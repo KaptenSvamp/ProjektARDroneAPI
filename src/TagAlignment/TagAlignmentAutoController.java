@@ -37,16 +37,16 @@ public class TagAlignmentAutoController extends TagAlignmentAbstractController i
 		
 		altitudeListener = new AltitudeListener()
 		{
-			@Override
-			public void receivedAltitude(int altitude) {
-				Altitude = altitude;
-			}
+                    @Override
+                    public void receivedAltitude(int altitude) {
+                            Altitude = altitude;
+                    }
 
-			@Override
-			public void receivedExtendedAltitude(
-					de.yadrone.base.navdata.Altitude d) {
-				
-			}
+                    @Override
+                    public void receivedExtendedAltitude(
+                                    de.yadrone.base.navdata.Altitude d) {
+
+                    }
 			
 		};
 		drone.getNavDataManager().addAltitudeListener(altitudeListener);
@@ -119,7 +119,7 @@ public class TagAlignmentAutoController extends TagAlignmentAbstractController i
                     return false;
 
             // a tag is centered if it is
-            // 1. if "Point 1" (on the tag the upper left point) is near the center of the camera  
+            // 1. if "Point 1" (on the tag, the upper left point) is near the center of the camera  
             // 2. orientation is between 350 and 10 degrees
 
             int imgCenterX = TagAlignment.IMAGE_WIDTH / 2;

@@ -49,6 +49,15 @@ public class main
 	    content.setBackground(Color.white);
 	    content.setLayout(new FlowLayout());
 	    
+            JButton testButton = new JButton("SetTestBool");
+	    testButton.addActionListener(new ActionListener()
+	    {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    droneControl.AutoPilot.SetTestInTestThread();
+                }
+	    });
+            
             JButton iterationButton = new JButton("Iteration");
 	    iterationButton.addActionListener(new ActionListener()
 	    {
@@ -117,6 +126,7 @@ public class main
 	    content.add(hoverButton);
 	    content.add(landButton);
             content.add(iterationButton);
+            content.add(testButton);
 	    
 	    content.add(tagAlignment);
 	    content.add(disableTagAlignment);

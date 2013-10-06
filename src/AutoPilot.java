@@ -43,11 +43,9 @@ public class AutoPilot {
             {
                 if(AutoPilotPatternsThread != null && autoPilotEngaged)
                 {
-                    AutoPilotPatternsThread.stop();
-                }
-            
-                //if(TagAlignment.IsEnabled())
-                //    TagAlignment.enableAutoControl(false);
+                    AutoPilotPatternsThread.interrupt();
+                    //AutoPilotPatternsThread.stop();
+                }            
             }
             catch(Exception e)
             {
@@ -78,13 +76,20 @@ public class AutoPilot {
 	public void RunTagAlignment()
 	{
             IndicatePatternStarted();
-            //TagAlignment.enableAutoControl(true);
+            
+            AutoPilotPatterns.SetCurrentPattern(Pattern.TagAlignment);
+            AutoPilotPatterns.SetTagAlignmentLanding(false);
+            
+            AutoPilotPatternsThread = new Thread(AutoPilotPatterns);
+            AutoPilotPatternsThread.start();
 	}
 	              
 	public void RunTagAlignmentLanding()
 	{
-            IndicatePatternStarted();
-            //TagAlignment.landOnTag();
+            if(AutoPilotPatternsThread == null)
+                RunTagAlignment();
+                
+            AutoPilotPatterns.SetTagAlignmentLanding(true);
 	}
         
         public void RunTestThread()
@@ -95,6 +100,11 @@ public class AutoPilot {
             
             AutoPilotPatternsThread = new Thread(AutoPilotPatterns);
             AutoPilotPatternsThread.start();
+        }
+        
+        public void SetTestInTestThread()
+        {
+            AutoPilotPatterns.test = true;
         }
 	
         public void RunHoverAndLand(int ms)

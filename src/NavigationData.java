@@ -109,7 +109,8 @@ public class NavigationData {
             {
                 Manager.addTimeListener(new TimeListener()
                 {
-                    public void timeReceived(int seconds, int useconds)
+                    @Override
+                    public synchronized void timeReceived(int seconds, int useconds)
                     {
                         CurrentTimeStamp = seconds;
                         CurrentTimeStampU = useconds;
@@ -120,7 +121,8 @@ public class NavigationData {
 
                     private NavdataLogger logger;
 
-                    public void attitudeUpdated(float pitch, float roll, float yaw)
+                    @Override
+                    public synchronized void attitudeUpdated(float pitch, float roll, float yaw)
                     {
                         //System.out.println("pitch: " + pitch + " roll: " + roll + " yaw:" + yaw);
 
@@ -138,15 +140,15 @@ public class NavigationData {
                         logger.LogData(data, GetTimeSinceStart(), CurrentTimeStamp);
                     }
 
-                    public void attitudeUpdated(float pitch, float roll) { }
-                    public void windCompensation(float pitch, float roll) { }
+                    public synchronized void attitudeUpdated(float pitch, float roll) { }
+                    public synchronized void windCompensation(float pitch, float roll) { }
                 });
 
-                Manager. addAltitudeListener(new AltitudeListener(){
+                Manager.addAltitudeListener(new AltitudeListener(){
                     private NavdataLogger logger;
 
                     @Override
-                    public void receivedAltitude(int altitude) {
+                    public synchronized void receivedAltitude(int altitude) {
 
                         Altitude = altitude;
 
@@ -163,7 +165,7 @@ public class NavigationData {
                     }
 
                     @Override
-                    public void receivedExtendedAltitude(Altitude arg0) {
+                    public synchronized void receivedExtendedAltitude(Altitude arg0) {
 
                     }
 
@@ -172,20 +174,22 @@ public class NavigationData {
                 Manager.addUltrasoundListener(new UltrasoundListener()
                 {
                     @Override
-                    public void receivedRawData(UltrasoundData ud) {
+                    public synchronized void receivedRawData(UltrasoundData ud) {
 
                     }
                 });
 
                 Manager.addBatteryListener(new BatteryListener() {
                     
-                    public void batteryLevelChanged(int percentage)
+                    @Override
+                    public synchronized void batteryLevelChanged(int percentage)
                     {
                         BatteryLevel = percentage;
                         //System.out.println("Battery: " + percentage + " %");
                     }
 
-                    public void voltageChanged(int vbat_raw) {
+                    @Override
+                    public synchronized void voltageChanged(int vbat_raw) {
                         BatteryVoltage = vbat_raw;
                     }
                 });
@@ -196,7 +200,7 @@ public class NavigationData {
                     private NavdataLogger distanceLogger;
 
                     @Override
-                    public void velocityChanged(float vx, float vy, float vz)
+                    public synchronized void velocityChanged(float vx, float vy, float vz)
                     {
                         VelocityX = vx;
                         VelocityY = vy;
@@ -239,11 +243,11 @@ public class NavigationData {
                 Manager.addAcceleroListener(new AcceleroListener()
                 {
                     @Override
-                    public void receivedPhysData(AcceleroPhysData arg0) {
+                    public synchronized void receivedPhysData(AcceleroPhysData arg0) {
                     }
 
                     @Override
-                    public void receivedRawData(AcceleroRawData arg0) {
+                    public synchronized void receivedRawData(AcceleroRawData arg0) {
                             // TODO Auto-generated method stub
 
                     }
@@ -253,7 +257,7 @@ public class NavigationData {
                 Drone.getVideoManager().addImageListener(new ImageListener() {
 
                     @Override
-                    public void imageUpdated(BufferedImage newImage)
+                    public synchronized void imageUpdated(BufferedImage newImage)
                     {
                         try {
                             CurrentImage = newImage;
@@ -269,11 +273,11 @@ public class NavigationData {
                 Manager.addStateListener(new StateListener(){
 
                         @Override
-                        public void controlStateChanged(ControlState state) {
+                        public synchronized void controlStateChanged(ControlState state) {
                         }
 
                         @Override
-                        public void stateChanged(DroneState state) {
+                        public synchronized void stateChanged(DroneState state) {
                                 IsFlying = state.isFlying();
 
                         }
@@ -285,7 +289,7 @@ public class NavigationData {
                     private NavdataLogger logger; 
                     
                     @Override
-                    public void received(PWMData pwmd) {
+                    public synchronized void received(PWMData pwmd) {
                                                 
                         int[] current = pwmd.getCurrentMotor();
                         short[] motor = pwmd.getMotor();
@@ -375,7 +379,7 @@ public class NavigationData {
                     private NavdataLogger logger;
                     
                     @Override
-                    public void receivedTrimData(float angularRates, float eulerAnglesTheta, float eulerAnglesPhi) {
+                    public synchronized void receivedTrimData(float angularRates, float eulerAnglesTheta, float eulerAnglesPhi) {
                         if(logger == null)
                         {
                             logger = new NavdataLogger("Trim Data", "AngularRates" 

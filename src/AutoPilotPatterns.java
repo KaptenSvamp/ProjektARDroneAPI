@@ -17,10 +17,15 @@ public class AutoPilotPatterns extends NotificationThread{
     public Pattern GetCurrentPattern(){return CurrentPattern;}
     public void SetCurrentPattern(Pattern pattern){CurrentPattern = pattern;}
     
+    private TagAlignment TagAlignment;
+    
+    public boolean test = false;
+    
     public AutoPilotPatterns(IARDrone drone)
     {
         Drone = drone;
         Command = drone.getCommandManager();
+        TagAlignment = new TagAlignment(Drone);
     }
     
     @Override
@@ -46,6 +51,17 @@ public class AutoPilotPatterns extends NotificationThread{
                 RLBF();
                 break;
             }
+            case TagAlignment:
+            {
+                TagAlignment();
+                break;
+            }
+            case TagAlignmentLanding:
+            {
+                SetTagAlignmentLanding(true);
+                TagAlignment();
+                break;
+            }
             default:
             {
                 return;
@@ -56,8 +72,12 @@ public class AutoPilotPatterns extends NotificationThread{
     
     private void TagAlignment()
     {
-        TagAlignment tagAlignment = new TagAlignment(Drone);
-        
+        TagAlignment.ControlLoop();
+    }
+    
+    public void SetTagAlignmentLanding(boolean land)
+    {
+        TagAlignment.SetLanding(land);
     }
     
     private void TestThread()
@@ -70,6 +90,9 @@ public class AutoPilotPatterns extends NotificationThread{
                 i++;
                 System.out.println("Iteration: " + i);
                 Thread.sleep(1000);
+                
+                if(test)
+                    System.out.println("TEST!!!!!!!!!!!!!!!!!!!");
                 
                 if(i > 20)
                     break;

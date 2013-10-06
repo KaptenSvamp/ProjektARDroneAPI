@@ -10,5 +10,7 @@
 public enum Pattern{
     TestThread,
     HoverAndLand,
-    RLBF
+    RLBF,
+    TagAlignment,
+    TagAlignmentLanding
 }
