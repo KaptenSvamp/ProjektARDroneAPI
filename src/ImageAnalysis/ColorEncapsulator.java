@@ -48,13 +48,13 @@ public class ColorEncapsulator {
         switch (c)
         {
             case RED:
-                if (red > 3* blue && red > 3*green)
-//                if (red > dominans && blue < 50 && green < 50)
+//                if (red > 2* blue && red > 2*green)
+                if (red > dominans && blue < 50 && green < 50)
                     return true;
                 return false;
             case GREEN:
-//                if (red < 50 && blue < 50 && green > dominans)
-                if (green > 3* blue && green > 3*red)
+                if (red < 100 && blue < 100 && green > dominans)
+//                if (green > 2* blue && green > 2*red)
                     return true;
                 return false;
             default:

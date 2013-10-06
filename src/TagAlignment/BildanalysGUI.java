@@ -3,7 +3,6 @@ package TagAlignment;
 
 import ImageAnalysis.ImageAnalyser;
 import TagAlignment.TagAlignment;
-import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.KeyEventDispatcher;
@@ -24,6 +23,8 @@ import de.yadrone.apps.controlcenter.plugins.keyboard.KeyboardCommandManager;
 import de.yadrone.apps.paperchase.TagListener;
 import de.yadrone.base.IARDrone;
 import de.yadrone.base.video.ImageListener;
+import java.awt.Color;
+import java.awt.Point;
 
 public class BildanalysGUI extends JFrame implements ImageListener, TagListener
 {
@@ -60,8 +61,10 @@ public class BildanalysGUI extends JFrame implements ImageListener, TagListener
         		if (image != null)
         		{
         			g.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
-        			
-                                int[] test = imageAnalyser.getPoints();
+        			g.setColor(Color.RED);
+                                Point[] pointss = imageAnalyser.getLocation();
+                                g.drawLine(pointss[0].x, pointss[0].y, pointss[1].x, pointss[1].y);
+                                g.drawString("Angle: " + imageAnalyser.getAngle(), imageAnalyser.getOrigin().x, imageAnalyser.getOrigin().y);
                              //   g.setColor(Color.RED);
                              //   g.drawRect(test[0], test[1], test[2] - test[0], test[3] - test[1]);
                                 
