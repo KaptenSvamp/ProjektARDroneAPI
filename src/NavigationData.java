@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import de.yadrone.base.*;
 import de.yadrone.base.navdata.*;
 import de.yadrone.base.video.*;
+import java.util.ArrayList;
 
 public class NavigationData {
 	private final IARDrone Drone;
@@ -129,7 +130,7 @@ public class NavigationData {
 
                         if(logger == null)
                         {
-                            logger = new NavdataLogger("Attitude", NavdataLogger.sep + "pitch" + NavdataLogger.sep + "roll" + NavdataLogger.sep + "yaw");
+                            logger = new NavdataLogger("Attitude", "pitch" + NavdataLogger.sep + "roll" + NavdataLogger.sep + "yaw");
                         }
 
                         String[] data = {pitch+"", roll+"", yaw+""};
@@ -177,11 +178,11 @@ public class NavigationData {
                 });
 
                 Manager.addBatteryListener(new BatteryListener() {
-
+                    
                     public void batteryLevelChanged(int percentage)
                     {
                         BatteryLevel = percentage;
-                        System.out.println("Battery: " + percentage + " %");
+                        //System.out.println("Battery: " + percentage + " %");
                     }
 
                     public void voltageChanged(int vbat_raw) {
@@ -265,7 +266,7 @@ public class NavigationData {
                     }
                 });
 
-                /*Drone.getNavDataManager().addStateListener(new StateListener(){
+                Manager.addStateListener(new StateListener(){
 
                         @Override
                         public void controlStateChanged(ControlState state) {
@@ -275,7 +276,123 @@ public class NavigationData {
                         public void stateChanged(DroneState state) {
                                 IsFlying = state.isFlying();
 
-                        }});*/
+                        }
+                });
+                
+                
+                Manager.addPWMlistener(new PWMlistener() {
+
+                    private NavdataLogger logger; 
+                    
+                    @Override
+                    public void received(PWMData pwmd) {
+                                                
+                        int[] current = pwmd.getCurrentMotor();
+                        short[] motor = pwmd.getMotor();
+                        short[] satMotor = pwmd.getSatMotor();
+                        int[] URPY = pwmd.getUPRY();
+                        int[] UGazPlanifPRY = pwmd.getUPlanifPRY();
+                        float vzRef = pwmd.getVzRef();
+                        float yawUI = pwmd.getYawUI();
+                        float altitudeDer = pwmd.getAltitudeDer();
+                        float altitudeIntegral = pwmd.getAltitudeIntegral();
+                        float altitudeProp = pwmd.getAltitudeProp();
+                        float gazAltitude = pwmd.getGazAltitude();
+                        float gazFeedForward = pwmd.getGazFeedForward();
+                        
+                        ArrayList dataList = new ArrayList<String>();
+
+                        String description = "";
+
+                        for(int i=0; i<current.length; i++)
+                        {
+                            dataList.add(current[i] + "");
+                            description += "current" + i + NavdataLogger.sep;
+                        }
+
+                        for(int i=0; i<motor.length; i++)
+                        {
+                            dataList.add(motor[i] + "");
+                            description += "motor" + i + NavdataLogger.sep;
+                        }
+
+                        for(int i=0; i<satMotor.length; i++)
+                        {
+                            dataList.add(satMotor[i] + "");
+                            description += "satMotor" + i + NavdataLogger.sep;
+                        }
+
+                        for(int i=0; i<URPY.length; i++)
+                        {
+                            dataList.add(URPY[i] + "");
+                            description += "URPY" + i + NavdataLogger.sep;
+                        }
+
+                        for(int i=0; i<UGazPlanifPRY.length; i++)
+                        {
+                            dataList.add(UGazPlanifPRY[i] + "");
+                            description += "UGazPlanifPRY" + i + NavdataLogger.sep;
+                        }
+
+                        description += "vzRef" + NavdataLogger.sep;
+                        dataList.add(vzRef + "");
+
+                        description += "yawUI" + NavdataLogger.sep;
+                        dataList.add(yawUI + "");
+
+                        description += "altitudeDer" + NavdataLogger.sep;
+                        dataList.add(altitudeDer + "");
+
+                        description += "altitudeIntegral" + NavdataLogger.sep;
+                        dataList.add(altitudeIntegral + "");
+
+                        description += "altitudeProp" + NavdataLogger.sep;
+                        dataList.add(altitudeProp + "");
+
+                        description += "gazAltitude" + NavdataLogger.sep;
+                        dataList.add(gazAltitude + "");
+
+                        description += "gazFeedForward";
+                        dataList.add(gazFeedForward + "");
+
+                        if(logger == null)
+                        {
+                            logger = new NavdataLogger("PWM Data", description);
+                        }
+                        
+                        String[] dataArray = new String[dataList.size()];
+                        dataArray = (String[])dataList.toArray(dataArray);
+                        
+                        long timeSinceStart = GetTimeSinceStart();
+                        long timeStamp = CurrentTimeStamp;
+                        
+                        logger.LogData(dataArray, timeSinceStart, timeStamp);
+                    }
+                });
+                
+                Manager.addTrimsListener(new TrimsListener(){
+
+                    private NavdataLogger logger;
+                    
+                    @Override
+                    public void receivedTrimData(float angularRates, float eulerAnglesTheta, float eulerAnglesPhi) {
+                        if(logger == null)
+                        {
+                            logger = new NavdataLogger("Trim Data", "AngularRates" 
+                                    + NavdataLogger.sep + "EulerAnglesTheta"
+                                    + NavdataLogger.sep + "EulerAnglesPhi");
+                        }
+                        
+                        String[] data = {angularRates+"", eulerAnglesTheta+"", eulerAnglesPhi+""};
+                        
+                        long timeSinceStart = GetTimeSinceStart();
+                        long timeStamp = CurrentTimeStamp;
+                        
+                        logger.LogData(data, timeSinceStart, timeStamp);
+                        
+                    }
+                });
+
             }
             catch(Exception e)
             {

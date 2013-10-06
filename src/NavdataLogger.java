@@ -18,7 +18,7 @@ public class NavdataLogger {
 			Name = name;
 			Description = description;
 			Path = "C:\\temp\\data";
-			CurrentDateTime = "TEST3";//new Date().toString().replace(":", "_");
+			CurrentDateTime = new Date().toString().replace(":", "_");
 			FullPath = Path + "\\" + name + " " + CurrentDateTime + ".txt";
 			SampleCount = 0;
 		}

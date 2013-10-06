@@ -5,7 +5,6 @@ import java.util.Random;
 
 import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
-
 import de.yadrone.base.IARDrone;
 import de.yadrone.base.command.LEDAnimation;
 import de.yadrone.base.navdata.AltitudeListener;

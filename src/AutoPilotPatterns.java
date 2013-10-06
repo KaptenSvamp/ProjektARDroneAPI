@@ -1,5 +1,6 @@
 
 import NotificationThread.NotificationThread;
+import TagAlignment.TagAlignment;
 import de.yadrone.base.IARDrone;
 import de.yadrone.base.command.CommandManager;
 
@@ -51,6 +52,12 @@ public class AutoPilotPatterns extends NotificationThread{
             }
             
         }
+    }
+    
+    private void TagAlignment()
+    {
+        TagAlignment tagAlignment = new TagAlignment(Drone);
+        
     }
     
     private void TestThread()

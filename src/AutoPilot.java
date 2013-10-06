@@ -13,7 +13,7 @@ public class AutoPilot {
 	private boolean autoPilotEngaged;
 	public boolean IsAutoPilotEngaged(){ return autoPilotEngaged;}
 	
-	private TagAlignment TagAlignment;
+	//private TagAlignment TagAlignment;
         private AutoPilotPatterns AutoPilotPatterns;
         private Thread AutoPilotPatternsThread;
 	
@@ -23,7 +23,7 @@ public class AutoPilot {
             Drone = drone;
             Command = Drone.getCommandManager();
             
-            TagAlignment = new TagAlignment(drone, true);
+            //TagAlignment = new TagAlignment(drone, true);
             
             AutoPilotPatterns = new AutoPilotPatterns(drone);
             
@@ -46,8 +46,8 @@ public class AutoPilot {
                     AutoPilotPatternsThread.stop();
                 }
             
-                if(TagAlignment.IsEnabled())
-                    TagAlignment.enableAutoControl(false);
+                //if(TagAlignment.IsEnabled())
+                //    TagAlignment.enableAutoControl(false);
             }
             catch(Exception e)
             {
@@ -78,13 +78,13 @@ public class AutoPilot {
 	public void RunTagAlignment()
 	{
             IndicatePatternStarted();
-            TagAlignment.enableAutoControl(true);
+            //TagAlignment.enableAutoControl(true);
 	}
 	              
 	public void RunTagAlignmentLanding()
 	{
             IndicatePatternStarted();
-            TagAlignment.landOnTag();
+            //TagAlignment.landOnTag();
 	}
         
         public void RunTestThread()
