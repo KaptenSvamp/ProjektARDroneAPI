@@ -47,9 +47,9 @@ public class ImageAnalyser  {
         xmax=0;
         ymin=this.getCurrentImage().getHeight()-1;
         ymax=0;
-        for (int x=0;x<this.currentImage.getWidth();x++)
+        for (int x=0;x<this.currentImage.getWidth();x+=5)
         {
-            for (int y=0;y<this.currentImage.getHeight();y++)
+            for (int y=0;y<this.currentImage.getHeight();y+=5)
             {
                 red.trackColor(x, y, currentImage.getRGB(x, y));
                 green.trackColor(x, y, currentImage.getRGB(x, y));
@@ -64,21 +64,58 @@ public class ImageAnalyser  {
         }
         return this.currentImage;
     }
-
     
-    public void isCentered()
+    public boolean foundColors()
     {
+        return (foundRed() && foundGreen());
+    }
+    
+    public boolean foundRed()
+    {
+        return (redPoint != null);
+    }
+
+    public boolean foundGreen()
+    {
+        return (greenPoint != null);
+    }
+    
+    public boolean isCentered()
+    {
+        return (oriented() && centered());
+    }
+    
+    private boolean oriented()
+    {
+        return (getAngle() > 350 && getAngle() < 10);
+    }
+    
+    private boolean centered()
+    {
+        int tolerance = TagAlignment.TagAlignment.TOLERANCE / 2;
+        int w = TagAlignment.TagAlignment.IMAGE_WIDTH;
+        int h = TagAlignment.TagAlignment.IMAGE_HEIGHT;
+        boolean horizontal;
+        boolean vertical;
         
+        horizontal  = (getOrigin().x > w-tolerance && getOrigin().x < w+tolerance);
+        vertical    = (getOrigin().y > h-tolerance && getOrigin().y < h+tolerance);
+        
+        return (horizontal && vertical);
     }
     
     public Point getOrigin()
     {
-        int xmin = (greenPoint.x < redPoint.x) ? greenPoint.x : redPoint.x;
-        int xmax = (greenPoint.x > redPoint.x) ? greenPoint.x : redPoint.x;
-        int ymin = (greenPoint.y < redPoint.y) ? greenPoint.y : redPoint.y;
-        int ymax = (greenPoint.y > redPoint.y) ? greenPoint.y : redPoint.y;
-        
-        Point retVal = new Point(xmin + ((xmax-xmin) / 2), ymin + ((ymax-ymin) / 2));
+        Point retVal = new Point(0,0);
+        if (greenPoint != null && redPoint != null)
+        {
+            int xmin = (greenPoint.x < redPoint.x) ? greenPoint.x : redPoint.x;
+            int xmax = (greenPoint.x > redPoint.x) ? greenPoint.x : redPoint.x;
+            int ymin = (greenPoint.y < redPoint.y) ? greenPoint.y : redPoint.y;
+            int ymax = (greenPoint.y > redPoint.y) ? greenPoint.y : redPoint.y;
+
+            retVal = new Point(xmin + ((xmax-xmin) / 2), ymin + ((ymax-ymin) / 2));
+        }
         return retVal;
     }
     
@@ -88,10 +125,11 @@ public class ImageAnalyser  {
      */
     public Point[] getLocation()
     {
-        Point[] retVal = null;
+        Point[] retVal = new Point[2];
+        retVal[0] = new Point(0,0);
+        retVal[1] = new Point(0,0);
         if (greenPoint != null && redPoint != null)
         {
-            retVal = new Point[2];
             retVal[0] = greenPoint;
             retVal[1] = redPoint;
         }
