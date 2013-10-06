@@ -181,7 +181,7 @@ public class NavigationData {
                     public void batteryLevelChanged(int percentage)
                     {
                         BatteryLevel = percentage;
-                        //System.out.println("Battery: " + percentage + " %");
+                        System.out.println("Battery: " + percentage + " %");
                     }
 
                     public void voltageChanged(int vbat_raw) {

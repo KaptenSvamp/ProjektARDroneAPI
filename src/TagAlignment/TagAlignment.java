@@ -1,9 +1,9 @@
 package TagAlignment;
 
+import de.yadrone.apps.paperchase.PaperChaseGUI;
 import de.yadrone.base.IARDrone;
 import de.yadrone.base.command.VideoChannel;
 import de.yadrone.apps.paperchase.QRCodeScanner;
-import de.yadrone.apps.paperchase.PaperChaseGUI;
 import java.awt.event.WindowEvent;
 
 public class TagAlignment
@@ -13,10 +13,10 @@ public class TagAlignment
 
     public final static int TOLERANCE = 100;
 
-    private IARDrone drone = null;
+    private IARDrone drone;
     private TagAlignmentAutoController autoController;
-    private QRCodeScanner scanner = null;
-    private PaperChaseGUI gui = null;
+    private QRCodeScanner scanner;
+    private BildanalysGUI gui;
     
     private boolean Enabled;
     public boolean IsEnabled(){return Enabled;}
@@ -59,7 +59,8 @@ public class TagAlignment
             
             if(Debug)
             {
-                gui = new PaperChaseGUI(drone);
+                gui = new BildanalysGUI(drone);
+               // gui = new PaperChaseGUI(drone);
                 scanner.addListener(gui);
                 drone.getVideoManager().addImageListener(gui);
             }
@@ -70,7 +71,7 @@ public class TagAlignment
             this.drone.getVideoManager().addImageListener(scanner);
 
             scanner.addListener(autoController);
-            autoController.start();
+         //   autoController.start();
         }
         else
         {
