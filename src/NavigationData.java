@@ -152,7 +152,7 @@ public class NavigationData {
 
                         Altitude = altitude;
 
-                        System.out.println("altitude: " + altitude);
+                        //System.out.println("altitude: " + altitude);
 
                         if(logger == null)
                         {

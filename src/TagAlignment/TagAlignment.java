@@ -40,7 +40,7 @@ public class TagAlignment implements ImageListener
             }
 
             @Override
-            public void receivedExtendedAltitude(
+            public synchronized void receivedExtendedAltitude(
                             de.yadrone.base.navdata.Altitude d) {
 
             }
@@ -51,7 +51,11 @@ public class TagAlignment implements ImageListener
 
     @Override
     public void imageUpdated(BufferedImage bi) {
-        ImageAnalyser.analyse(bi);
+        //System.out.println("image recived");
+        synchronized(ImageAnalyser)
+        {
+            ImageAnalyser.analyse(bi);
+        }
     }
     
     public void ControlLoop()
@@ -62,23 +66,32 @@ public class TagAlignment implements ImageListener
             {
                 boolean foundColors = ImageAnalyser.foundColors();
 
+                if(ImageAnalyser.foundRed())
+                    System.out.println("foundRED: true");
+                
                 if(foundColors)
                 {
                     boolean isCentered = false;
-                    
-                    synchronized(ImageAnalyser)
-                    {
-                        isCentered = ImageAnalyser.isCentered();
-                    }
+                   
+                    isCentered = ImageAnalyser.isCentered();
+                    Point points = ImageAnalyser.getOrigin();
+                    double orientation = ImageAnalyser.getAngle();
+
+                    System.out.println("x: " + points.getX() + " y: " + points.getY() + " orient: " + orientation);
+
+                    if(isCentered)
+                        System.out.println("CENTERED!!!!!!!!!!!!!!!");
                     
                     if (!isCentered) // tag visible, but not centered
                     {
-                        centerTag();
+                        //centerTag();
                     }                    
                     else if(DoLanding)
                     {
-                        landing();
+                        //landing();
                     }
+                    
+                    Thread.currentThread().sleep(SLEEP);
                 }
             }
         }
@@ -104,8 +117,8 @@ public class TagAlignment implements ImageListener
             int imgCenterX = TagAlignment.IMAGE_WIDTH / 2;
             int imgCenterY = TagAlignment.IMAGE_HEIGHT / 2;
 
-            float x = points.x;
-            float y = points.y;
+            double x = points.getX();
+            double y = points.getY();
 
             if ((orientation > 10) && (orientation < 180))
             {

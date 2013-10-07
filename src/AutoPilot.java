@@ -1,5 +1,5 @@
 import NotificationThread.TaskListener;
-import TagAlignment.TagAlignment;
+import TagAlignment.BildanalysGUI;
 import de.yadrone.base.IARDrone;
 import de.yadrone.base.command.*;
 
@@ -16,14 +16,13 @@ public class AutoPilot {
 	//private TagAlignment TagAlignment;
         private AutoPilotPatterns AutoPilotPatterns;
         private Thread AutoPilotPatternsThread;
-	
                
 	public AutoPilot(IARDrone drone)
 	{
             Drone = drone;
             Command = Drone.getCommandManager();
             
-            //TagAlignment = new TagAlignment(drone, true);
+            Drone.getCommandManager().setVideoChannel(VideoChannel.VERT);
             
             AutoPilotPatterns = new AutoPilotPatterns(drone);
             
@@ -41,7 +40,7 @@ public class AutoPilot {
         {
             try
             {
-                if(AutoPilotPatternsThread != null && autoPilotEngaged)
+                if(AutoPilotPatternsThread != null)
                 {
                     AutoPilotPatternsThread.interrupt();
                     //AutoPilotPatternsThread.stop();
@@ -49,7 +48,7 @@ public class AutoPilot {
             }
             catch(Exception e)
             {
-                
+                AutoPilotPatternsThread.stop();
             }
             
             Command.landing();
@@ -76,6 +75,9 @@ public class AutoPilot {
 	public void RunTagAlignment()
 	{
             IndicatePatternStarted();
+            
+            BildanalysGUI gui = new BildanalysGUI(Drone);
+            Drone.getVideoManager().addImageListener(gui);
             
             AutoPilotPatterns.SetCurrentPattern(Pattern.TagAlignment);
             AutoPilotPatterns.SetTagAlignmentLanding(false);

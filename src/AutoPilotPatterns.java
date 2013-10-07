@@ -26,6 +26,8 @@ public class AutoPilotPatterns extends NotificationThread{
         Drone = drone;
         Command = drone.getCommandManager();
         TagAlignment = new TagAlignment(Drone);
+        
+        Drone.getVideoManager().addImageListener(TagAlignment);
     }
     
     @Override
