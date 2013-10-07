@@ -10,5 +10,5 @@ package ImageAnalysis;
  * @author Victor
  */
 public enum COLORS {
-    RED, GREEN, BLUE
+    RED, GREEN, BLUE, WHITE
 }

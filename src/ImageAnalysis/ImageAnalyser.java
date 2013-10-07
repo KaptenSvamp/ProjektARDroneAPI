@@ -16,8 +16,7 @@ import javax.swing.JPanel;
  * @author Victor
  */
 public class ImageAnalyser  {
-    private Point greenPoint;
-    private Point redPoint;
+    private Point irFinderPoint;
     private BufferedImage currentImage;
      /**
      * @return the currentImage
@@ -29,8 +28,7 @@ public class ImageAnalyser  {
     public ImageAnalyser()            
     {
         currentImage = null;
-        greenPoint = null;
-        redPoint = null;
+        irFinderPoint = null;
     }
     /**
      * Analyses the passed BufferedImage - e.g. looks for colors
@@ -40,25 +38,20 @@ public class ImageAnalyser  {
     public BufferedImage analyse(BufferedImage bi)
     {
         this.currentImage = bi;
-        ColorEncapsulator red = new ColorEncapsulator(COLORS.RED, currentImage.getWidth(), currentImage.getHeight());
-        ColorEncapsulator green = new ColorEncapsulator(COLORS.GREEN, currentImage.getWidth(), currentImage.getHeight());
-        greenPoint = null;
-        redPoint = null;
+        ColorEncapsulator IR_Finder = new ColorEncapsulator(COLORS.WHITE, currentImage.getWidth(), currentImage.getHeight());
+        irFinderPoint = null;
 
         for (int x=0;x<this.currentImage.getWidth();x+=5)
         {
             for (int y=0;y<this.currentImage.getHeight();y+=5)
             {
-                red.trackColor(x, y, currentImage.getRGB(x, y));
-                green.trackColor(x, y, currentImage.getRGB(x, y));
+                IR_Finder.trackColor(x, y, currentImage.getRGB(x, y));
             }
         }
-        red.drawCapsule(currentImage);
-        green.drawCapsule(currentImage);
-        if (red.colorFound() && green.colorFound())
+        IR_Finder.drawCapsule(currentImage);
+        if (IR_Finder.colorFound())
         {
-            greenPoint = green.getPosition();
-            redPoint = red.getPosition();
+            irFinderPoint = IR_Finder.getPosition();
         }
         return this.currentImage;
     }
@@ -68,41 +61,22 @@ public class ImageAnalyser  {
      */
     public boolean foundColors()
     {
-        return (foundRed() && foundGreen());
+        return foundIR();
     }
     /**
      * Determines if the red blob was found or not
      * @return 
      */
-    public boolean foundRed()
+    public boolean foundIR()
     {
-        return (redPoint != null);
+        return (irFinderPoint != null);
     }
-    /**
-     * Determines if the green blob was found or not
-     * @return 
-     */
-    public boolean foundGreen()
-    {
-        return (greenPoint != null);
-    }
+
     /**
      * Determines if the identified body is centerered or not.
      * @return 
      */    
     public boolean isCentered()
-    {
-        return (oriented() && centered());
-    }
-    /**
-     * Determines if the identified body is oriented or not
-     * @return 
-     */
-    private boolean oriented()
-    {
-        return (getAngle() > 350 && getAngle() < 10);
-    }
-    private boolean centered()
     {
         int tolerance = TagAlignment.TagAlignment.TOLERANCE / 2;
         int w = TagAlignment.TagAlignment.IMAGE_WIDTH;
@@ -122,58 +96,16 @@ public class ImageAnalyser  {
     public Point getOrigin()
     {
         Point retVal = new Point(0,0);
-        if (greenPoint != null && redPoint != null)
+        if (irFinderPoint != null)
         {
-            int xmin = (greenPoint.x < redPoint.x) ? greenPoint.x : redPoint.x;
-            int xmax = (greenPoint.x > redPoint.x) ? greenPoint.x : redPoint.x;
-            int ymin = (greenPoint.y < redPoint.y) ? greenPoint.y : redPoint.y;
-            int ymax = (greenPoint.y > redPoint.y) ? greenPoint.y : redPoint.y;
-
-            retVal = new Point(xmin + ((xmax-xmin) / 2), ymin + ((ymax-ymin) / 2));
+            retVal = this.irFinderPoint;
         }
         return retVal;
     }
     
-    /**
-     * Returns green LED location and red LED location
-     * @return [0] green, [1] red
-     */
-    public Point[] getLocation()
-    {
-        Point[] retVal = new Point[2];
-        retVal[0] = new Point(0,0);
-        retVal[1] = new Point(0,0);
-        if (greenPoint != null && redPoint != null)
-        {
-            retVal[0] = greenPoint;
-            retVal[1] = redPoint;
-        }
-        return retVal;
-    }
-    
-    /**
-     * Returns the location of the green LED.
-     * @return Point X,Y
-     */
-    public Point getGreenPoint(){return greenPoint;}
     /**
      * Returns the location of the red LED.
      * @return Point X,Y
      */
-    public Point getRedPoint(){return redPoint;}
-    /**
-     * Returns the angle between the two blobs
-     * @return 
-     */
-    public double getAngle()
-    {
-        double angle = -1.0;
-        if (greenPoint != null && redPoint != null)
-        {
-            angle = (double) Math.toDegrees(Math.atan2(redPoint.x - greenPoint.x, redPoint.y - greenPoint.y));
-            if (angle < 0)
-                angle += 360;
-        }
-        return angle;
-    }
+    public Point getRedPoint(){return irFinderPoint;}
 }

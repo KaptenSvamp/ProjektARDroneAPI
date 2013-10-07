@@ -79,6 +79,12 @@ public class ColorEncapsulator {
 //                if (green > 2* blue && green > 2*red)
                     return true;
                 return false;
+            case WHITE:
+                if (red > 240 && blue > 240 && green > 240)
+//                if (green > 2* blue && green > 2*red)
+                    return true;
+                return false;
+
             default:
                 return false;
         }
@@ -94,13 +100,13 @@ public class ColorEncapsulator {
         {
             for (int i = xmin;i<xmax;i++)
             {
-                bi.setRGB(i, ymin, 0);
-                bi.setRGB(i, ymax, 0);
+                bi.setRGB(i, ymin, 0xffffff);
+                bi.setRGB(i, ymax, 0xffffff);
             }
             for (int i = ymin;i<ymax;i++)
             {
-                bi.setRGB(xmin, i, 0);
-                bi.setRGB(xmax, i, 0);
+                bi.setRGB(xmin, i, 0xffffff);
+                bi.setRGB(xmax, i, 0xffffff);
             }
         }
     }

@@ -62,9 +62,6 @@ public class BildanalysGUI extends JFrame implements ImageListener, TagListener
         		{
         			g.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
         			g.setColor(Color.RED);
-                                Point[] pointss = imageAnalyser.getLocation();
-                                g.drawLine(pointss[0].x, pointss[0].y, pointss[1].x, pointss[1].y);
-                                g.drawString("Angle: " + imageAnalyser.getAngle(), imageAnalyser.getOrigin().x, imageAnalyser.getOrigin().y);
                              //   g.setColor(Color.RED);
                              //   g.drawRect(test[0], test[1], test[2] - test[0], test[3] - test[1]);
                                 

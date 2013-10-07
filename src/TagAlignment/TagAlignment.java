@@ -65,9 +65,6 @@ public class TagAlignment implements ImageListener
             while(!Thread.interrupted())
             {
                 boolean foundColors = ImageAnalyser.foundColors();
-
-                if(ImageAnalyser.foundRed())
-                    System.out.println("foundRED: true");
                 
                 if(foundColors)
                 {
@@ -75,9 +72,8 @@ public class TagAlignment implements ImageListener
                    
                     isCentered = ImageAnalyser.isCentered();
                     Point points = ImageAnalyser.getOrigin();
-                    double orientation = ImageAnalyser.getAngle();
 
-                    System.out.println("x: " + points.getX() + " y: " + points.getY() + " orient: " + orientation);
+                    System.out.println("x: " + points.getX() + " y: " + points.getY());
 
                     if(isCentered)
                         System.out.println("CENTERED!!!!!!!!!!!!!!!");
@@ -111,7 +107,7 @@ public class TagAlignment implements ImageListener
             synchronized(ImageAnalyser)
             {
                 points = ImageAnalyser.getOrigin();
-                orientation = ImageAnalyser.getAngle();
+                orientation = 0;
             }
 
             int imgCenterX = TagAlignment.IMAGE_WIDTH / 2;
