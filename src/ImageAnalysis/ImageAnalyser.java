@@ -136,6 +136,17 @@ public class ImageAnalyser  {
         return retVal;
     }
     
+    /**
+     * Returns the location of the green LED.
+     * @return Point X,Y
+     */
+    public Point getGreenPoint(){return greenPoint;}
+    /**
+     * Returns the location of the red LED.
+     * @return Point X,Y
+     */
+    public Point getRedPoint(){return redPoint;}
+    
     public double getAngle()
     {
         double angle = -1.0;

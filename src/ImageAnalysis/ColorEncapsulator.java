@@ -57,6 +57,11 @@ public class ColorEncapsulator {
 //                if (green > 2* blue && green > 2*red)
                     return true;
                 return false;
+            case BLUE:
+                if (red < 100 && blue > dominans && green < 100)
+//                if (green > 2* blue && green > 2*red)
+                    return true;
+                return false;
             default:
                 return false;
         }
