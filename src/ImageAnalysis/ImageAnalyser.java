@@ -16,26 +16,27 @@ import javax.swing.JPanel;
  * @author Victor
  */
 public class ImageAnalyser  {
-    private double dx;
-    private double dy;
     private Point greenPoint;
     private Point redPoint;
-    private int xmin=-1;
-    private int xmax=-1;
-    private int ymin=-1;
-    private int ymax=-1;
     private BufferedImage currentImage;
      /**
      * @return the currentImage
      */
     public BufferedImage getCurrentImage() {return currentImage;}
+    /**
+     * Creates a new ImageAnalyser
+     */
     public ImageAnalyser()            
     {
         currentImage = null;
         greenPoint = null;
         redPoint = null;
     }
-    
+    /**
+     * Analyses the passed BufferedImage - e.g. looks for colors
+     * @param bi The image to process
+     * @return 
+     */
     public BufferedImage analyse(BufferedImage bi)
     {
         this.currentImage = bi;
@@ -43,10 +44,7 @@ public class ImageAnalyser  {
         ColorEncapsulator green = new ColorEncapsulator(COLORS.GREEN, currentImage.getWidth(), currentImage.getHeight());
         greenPoint = null;
         redPoint = null;
-        xmin=this.getCurrentImage().getWidth()-1;
-        xmax=0;
-        ymin=this.getCurrentImage().getHeight()-1;
-        ymax=0;
+
         for (int x=0;x<this.currentImage.getWidth();x+=5)
         {
             for (int y=0;y<this.currentImage.getHeight();y+=5)
@@ -64,32 +62,46 @@ public class ImageAnalyser  {
         }
         return this.currentImage;
     }
-    
+    /**
+     * Determines if both red and green was identified or not
+     * @return 
+     */
     public boolean foundColors()
     {
         return (foundRed() && foundGreen());
     }
-    
+    /**
+     * Determines if the red blob was found or not
+     * @return 
+     */
     public boolean foundRed()
     {
         return (redPoint != null);
     }
-
+    /**
+     * Determines if the green blob was found or not
+     * @return 
+     */
     public boolean foundGreen()
     {
         return (greenPoint != null);
     }
-    
+    /**
+     * Determines if the identified body is centerered or not.
+     * @return 
+     */    
     public boolean isCentered()
     {
         return (oriented() && centered());
     }
-    
+    /**
+     * Determines if the identified body is oriented or not
+     * @return 
+     */
     private boolean oriented()
     {
         return (getAngle() > 350 && getAngle() < 10);
     }
-    
     private boolean centered()
     {
         int tolerance = TagAlignment.TagAlignment.TOLERANCE / 2;
@@ -103,7 +115,10 @@ public class ImageAnalyser  {
         
         return (horizontal && vertical);
     }
-    
+    /**
+     * Returns the origin of the identified body
+     * @return Origin in coordinates relative to the analysed BufferedImage
+     */
     public Point getOrigin()
     {
         Point retVal = new Point(0,0);
@@ -146,7 +161,10 @@ public class ImageAnalyser  {
      * @return Point X,Y
      */
     public Point getRedPoint(){return redPoint;}
-    
+    /**
+     * Returns the angle between the two blobs
+     * @return 
+     */
     public double getAngle()
     {
         double angle = -1.0;
@@ -158,17 +176,4 @@ public class ImageAnalyser  {
         }
         return angle;
     }
-    
-    public int[] getPoints()
-    {
-        int[] retVal = {xmin,ymin,xmax,ymax};
-        return retVal;
-    }
-    
-    /*
-    @Override
-    public void imageUpdated(BufferedImage bi) {
-        analyse(bi);
-    }*/
-
 }

@@ -4,7 +4,6 @@
  */
 package ImageAnalysis;
 
-import java.awt.Color;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 
@@ -17,6 +16,12 @@ public class ColorEncapsulator {
     private COLORS color;
     private boolean foundColor;
     private final int dominans = 150;
+    /**
+     * Creates a ColorEncapsulator class
+     * @param c Specified color to look for
+     * @param w The image width
+     * @param h The image height 
+     */
     public ColorEncapsulator(COLORS c, int w, int h)
     {
         this.color = c;
@@ -27,6 +32,12 @@ public class ColorEncapsulator {
         ymax=0;
     }
     
+    /**
+     * Checks wheter a specified coordinate is of the specified color or not and saves the coordinates for future usage
+     * @param x
+     * @param y
+     * @param rgb 
+     */
     public void trackColor(int x, int y, int rgb)
     {
         if (isDominant(this.color, rgb))
@@ -40,6 +51,12 @@ public class ColorEncapsulator {
         }
     }
     
+    /**
+     * Checks wheter the specified color is dominant in comparison with the rgb-value
+     * @param c
+     * @param rgb
+     * @return 
+     */
     private boolean isDominant(COLORS c, int rgb)
     {
         int red     = (rgb & 0x00ff0000) >> 16;
@@ -67,6 +84,10 @@ public class ColorEncapsulator {
         }
     }
     
+    /**
+     * Draws the capsule into the given BufferedImage
+     * @param bi 
+     */
     public void drawCapsule(BufferedImage bi)
     {
         if (colorFound())
@@ -84,11 +105,19 @@ public class ColorEncapsulator {
         }
     }
     
+    /**
+     * Returns the origin of the capsule
+     * @return 
+     */
     public Point getPosition()
     {
         return new Point(xmin + ((xmax-xmin) / 2),ymin + ((ymax-ymin) / 2));
     }
     
+    /**
+     * Determines wheter the specified color was found or not
+     * @return 
+     */
     public boolean colorFound()
     {
         return foundColor;
