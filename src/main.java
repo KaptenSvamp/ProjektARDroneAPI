@@ -44,7 +44,7 @@ public class main
 	{
             JFrame f = new JFrame("Drone control");
 	    f.setSize(450, 200);
-	    
+            
 	    Container content = f.getContentPane();
 	    content.setBackground(Color.white);
 	    content.setLayout(new FlowLayout());
@@ -123,14 +123,47 @@ public class main
                 }
 	    });
 	    
-	    content.add(hoverButton);
-	    content.add(landButton);
-            content.add(iterationButton);
-            content.add(testButton);
+            JButton setReferenceYaw = new JButton("Set reference yaw");
+	    setReferenceYaw.addActionListener(new ActionListener()
+	    {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    droneControl.AutoPilot.SetReferenceYaw();
+                }
+	    });
+            
+            JButton spintLeft = new JButton("Spin left");
+	    spintLeft.addActionListener(new ActionListener()
+	    {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    droneControl.SpinLeft(30);
+                }
+	    });
+            
+            JButton spintRight = new JButton("Spin right");
+	    spintRight.addActionListener(new ActionListener()
+	    {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    droneControl.SpinRight(30);
+                }
+	    });
 	    
-	    content.add(tagAlignment);
+            content.add(hoverButton);
+            content.add(landButton);
+            content.add(spintLeft);
+            content.add(spintRight);
+	    
+	    content.add(setReferenceYaw);
+            content.add(tagAlignment);
 	    content.add(disableTagAlignment);
 	    content.add(tagAlignmentLanding);
+	    
+            content.add(iterationButton);
+            //content.add(testButton);
+	    
+	    
 	    f.setVisible(true);
 		
 	}

@@ -2,6 +2,7 @@ import NotificationThread.TaskListener;
 import TagAlignment.BildanalysGUI;
 import de.yadrone.base.IARDrone;
 import de.yadrone.base.command.*;
+import de.yadrone.base.navdata.AttitudeListener;
 
 /*
  * @author Rasmus Bjerstedt
@@ -16,6 +17,8 @@ public class AutoPilot {
 	//private TagAlignment TagAlignment;
         private AutoPilotPatterns AutoPilotPatterns;
         private Thread AutoPilotPatternsThread;
+        
+        private float CurrentYaw;
                
 	public AutoPilot(IARDrone drone)
 	{
@@ -33,7 +36,30 @@ public class AutoPilot {
                 }
                 
             });
+            
+            /* Listener for setting ReferenceYaw */
+            Drone.getNavDataManager().addAttitudeListener(new AttitudeListener() {
 
+                    @Override
+                    public synchronized void attitudeUpdated(float pitch, float roll, float yaw)
+                    {
+                        CurrentYaw = yaw;
+                    }
+
+                    public synchronized void attitudeUpdated(float pitch, float roll) { }
+                    public synchronized void windCompensation(float pitch, float roll) { }
+                });
+
+        }
+        
+        public void SetReferenceYaw()
+        {
+            AutoPilotPatterns.SetReferenceYaw();
+        }
+        
+        public void SetReferenceYaw(float yaw)
+        {
+            AutoPilotPatterns.SetReferenceYaw(yaw);
         }
         
         public void StopAutoPilot()
@@ -51,7 +77,8 @@ public class AutoPilot {
                 AutoPilotPatternsThread.stop();
             }
             
-            Command.landing();
+            Command.hover();
+            //Command.landing();
             
             IndicatePatternStopped();
         }
@@ -79,7 +106,7 @@ public class AutoPilot {
             BildanalysGUI gui = new BildanalysGUI(Drone);
             Drone.getVideoManager().addImageListener(gui);
             
-            AutoPilotPatterns.SetCurrentPattern(Pattern.TagAlignment);
+            AutoPilotPatterns.SetCurrentPattern(FlyingPattern.TagAlignment);
             AutoPilotPatterns.SetTagAlignmentLanding(false);
             
             AutoPilotPatternsThread = new Thread(AutoPilotPatterns);
@@ -98,7 +125,7 @@ public class AutoPilot {
         {
             IndicatePatternStarted();
             
-            AutoPilotPatterns.SetCurrentPattern(Pattern.TestThread);
+            AutoPilotPatterns.SetCurrentPattern(FlyingPattern.TestThread);
             
             AutoPilotPatternsThread = new Thread(AutoPilotPatterns);
             AutoPilotPatternsThread.start();
@@ -114,7 +141,7 @@ public class AutoPilot {
             if(autoPilotEngaged)
                 StopAutoPilot();
             
-            AutoPilotPatterns.SetCurrentPattern(Pattern.HoverAndLand);
+            AutoPilotPatterns.SetCurrentPattern(FlyingPattern.HoverAndLand);
             
             AutoPilotPatternsThread = new Thread(AutoPilotPatterns);
             AutoPilotPatternsThread.start();
@@ -127,7 +154,7 @@ public class AutoPilot {
             if(autoPilotEngaged)
                 StopAutoPilot();
             
-            AutoPilotPatterns.SetCurrentPattern(Pattern.RLBF);
+            AutoPilotPatterns.SetCurrentPattern(FlyingPattern.RLBF);
             
             AutoPilotPatternsThread = new Thread(AutoPilotPatterns);
             AutoPilotPatternsThread.start();

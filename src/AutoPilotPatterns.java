@@ -13,9 +13,9 @@ public class AutoPilotPatterns extends NotificationThread{
     private IARDrone Drone;
     private CommandManager Command;
     
-    private Pattern CurrentPattern;
-    public Pattern GetCurrentPattern(){return CurrentPattern;}
-    public void SetCurrentPattern(Pattern pattern){CurrentPattern = pattern;}
+    private FlyingPattern CurrentPattern;
+    public FlyingPattern GetCurrentPattern(){return CurrentPattern;}
+    public void SetCurrentPattern(FlyingPattern pattern){CurrentPattern = pattern;}
     
     private TagAlignment TagAlignment;
     
@@ -30,46 +30,86 @@ public class AutoPilotPatterns extends NotificationThread{
         Drone.getVideoManager().addImageListener(TagAlignment);
     }
     
+    public synchronized void SetReferenceYaw(float yaw){ TagAlignment.SetReferenceYaw(yaw);}
+    public void SetReferenceYaw(){ TagAlignment.SetReferenceYaw();}
+    public float GetReferenceYaw(){return TagAlignment.GetReferenceYaw();}
+    
     @Override
     public void doWork()
     {
         if(CurrentPattern == null)
             return;
         
-        switch(CurrentPattern)
+        try
         {
-            case TestThread:
+            switch(CurrentPattern)
             {
-                TestThread();
-                break;
+                case TestThread:
+                {
+                    TestThread();
+                    break;
+                }
+                case HoverAndLand:
+                {
+                    HoverAndLand(5000);
+                    break;
+                }
+                case RLBF:
+                {
+                    RLBF();
+                    break;
+                }
+                case TagAlignment:
+                {
+                    TagAlignment();
+                    break;
+                }
+                case TagAlignmentLanding:
+                {
+                    SetTagAlignmentLanding(true);
+                    TagAlignment();
+                    break;
+                }
+                case SpinLeftHover:
+                {
+                    SpinLeftHover();
+                    break;
+                }
+                case SpinRightHover:
+                {
+                    SpinRightHover();
+                }
+                default:
+                {
+                    return;
+                }
+
             }
-            case HoverAndLand:
-            {
-                HoverAndLand(5000);
-                break;
-            }
-            case RLBF:
-            {
-                RLBF();
-                break;
-            }
-            case TagAlignment:
-            {
-                TagAlignment();
-                break;
-            }
-            case TagAlignmentLanding:
-            {
-                SetTagAlignmentLanding(true);
-                TagAlignment();
-                break;
-            }
-            default:
-            {
-                return;
-            }
-            
         }
+        catch(Exception e)
+        {
+            System.out.println("Pattern stopped: " + e);
+        }
+        
+    }
+    
+    private void SpinLeftHover() throws InterruptedException
+    {
+        Command.spinLeft(30);
+        Thread.sleep(1000);
+        
+        Command.spinLeft(10);
+        Thread.sleep(500);
+        
+        Command.hover();
+    }
+    
+    private void SpinRightHover() throws InterruptedException
+    {
+        Command.spinRight(30);
+        Thread.sleep(1000);
+        
+        Command.hover();
     }
     
     private void TagAlignment()

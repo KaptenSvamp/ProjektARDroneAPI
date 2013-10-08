@@ -53,7 +53,7 @@ public class NavigationData {
 	public float GetRoll(){return Roll;}
 	
 	private float Yaw;
-	public float GetYaw(){return Yaw;}
+	public float GetYaw(){return Yaw/1000;}
 	
 	public float[] GetPitchRollYaw(){return new float[]{Pitch, Roll, Yaw};}
 	

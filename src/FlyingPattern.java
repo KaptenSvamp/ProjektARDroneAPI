@@ -7,10 +7,12 @@
  *
  * @author Admin
  */
-public enum Pattern{
+public enum FlyingPattern{
     TestThread,
     HoverAndLand,
     RLBF,
     TagAlignment,
-    TagAlignmentLanding
+    TagAlignmentLanding,
+    SpinLeftHover,
+    SpinRightHover
 }
