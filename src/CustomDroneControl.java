@@ -3,9 +3,7 @@ import de.yadrone.base.command.*;
 
 /*
  * This class handles controlling of the drone from outside sources (Validation tool) 
- * and creates and initiates AutoPilot and NavigationData.
- * 
- * This is basically a wrap-around class for the YADrone API with extras. 
+ * and creates, initiates and holds AutoPilotManager and NavigationData.
  * 
  * @author Rasmus Bjerstedt
  */
@@ -14,7 +12,7 @@ public class CustomDroneControl {
     private final CommandManager Command;
 
     public NavigationData NavigationData;
-    public AutoPilot AutoPilot;
+    public AutoPilotManager AutoPilotManager;
 
     private boolean Initiated;
     public boolean isInitiated(){return Initiated;}
@@ -34,7 +32,7 @@ public class CustomDroneControl {
         {
             NavigationData = new NavigationData(Drone, SystemStartTime);
             Initiated = NavigationData.isInitiated();
-            AutoPilot = new AutoPilot(Drone);
+            AutoPilotManager = new AutoPilotManager(Drone);
 
             FlatTrim();
         }
@@ -136,9 +134,9 @@ public class CustomDroneControl {
         if(Drone != null)
             Drone.stop();
         
-        if(AutoPilot != null && AutoPilot.IsAutoPilotEngaged())
+        if(AutoPilotManager != null && AutoPilotManager.IsAutoPilotEngaged())
         {
-            AutoPilot.StopAutoPilot();
+            AutoPilotManager.StopAutoPilot();
         }
     }
 

@@ -54,7 +54,7 @@ public class main
 	    {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    droneControl.AutoPilot.SetTestInTestThread();
+                    droneControl.AutoPilotManager.SetTestInTestThread();
                 }
 	    });
             
@@ -63,7 +63,7 @@ public class main
 	    {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    droneControl.AutoPilot.RunTestThread();
+                    droneControl.AutoPilotManager.RunTestThread();
                 }
 	    });
             
@@ -83,7 +83,7 @@ public class main
                     catch(Exception ee)
                     {}
                     
-                    //droneControl.AutoPilot.RunHoverAndLand(4000);
+                    //droneControl.AutoPilotManager.RunHoverAndLand(4000);
                 }
 	    });
 	    
@@ -101,7 +101,7 @@ public class main
 	    {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                        droneControl.AutoPilot.RunTagAlignment();
+                        droneControl.AutoPilotManager.RunTagAlignment();
                 }
 	    });
 	    
@@ -110,7 +110,7 @@ public class main
 	    {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                        droneControl.AutoPilot.StopAutoPilot();
+                        droneControl.AutoPilotManager.StopAutoPilot();
                 }
 	    });
 	    
@@ -119,7 +119,7 @@ public class main
 	    {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                        droneControl.AutoPilot.RunTagAlignmentLanding();
+                        droneControl.AutoPilotManager.RunTagAlignmentLanding();
                 }
 	    });
 	    
@@ -128,7 +128,7 @@ public class main
 	    {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    droneControl.AutoPilot.SetReferenceYaw();
+                    droneControl.AutoPilotManager.SetReferenceYaw();
                 }
 	    });
             

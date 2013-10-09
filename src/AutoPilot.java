@@ -1,167 +1,252 @@
-import NotificationThread.TaskListener;
-import TagAlignment.BildanalysGUI;
-import de.yadrone.base.IARDrone;
-import de.yadrone.base.command.*;
-import de.yadrone.base.navdata.AttitudeListener;
 
-/*
+import NotificationThread.NotificationThread;
+import TagAlignment.TagAlignment;
+import de.yadrone.base.IARDrone;
+import de.yadrone.base.command.CommandManager;
+
+/**
+ *
  * @author Rasmus Bjerstedt
  */
-public class AutoPilot {
-	private final IARDrone Drone;
-	private final CommandManager Command;
-	
-	private boolean autoPilotEngaged;
-	public boolean IsAutoPilotEngaged(){ return autoPilotEngaged;}
-	
-	//private TagAlignment TagAlignment;
-        private AutoPilotPatterns AutoPilotPatterns;
-        private Thread AutoPilotPatternsThread;
+public class AutoPilot extends NotificationThread{
+    
+    private IARDrone Drone;
+    private CommandManager Command;
+    
+    private FlyingPattern CurrentPattern;
+    public FlyingPattern GetCurrentPattern(){return CurrentPattern;}
+    public void SetCurrentPattern(FlyingPattern pattern){CurrentPattern = pattern;}
+    
+    private TagAlignment TagAlignment;
+    
+    public boolean test = false;
+    
+    public AutoPilot(IARDrone drone)
+    {
+        Drone = drone;
+        Command = drone.getCommandManager();
+        TagAlignment = new TagAlignment(Drone);
         
-        private float CurrentYaw;
-               
-	public AutoPilot(IARDrone drone)
-	{
-            Drone = drone;
-            Command = Drone.getCommandManager();
-            
-            Drone.getCommandManager().setVideoChannel(VideoChannel.VERT);
-            
-            AutoPilotPatterns = new AutoPilotPatterns(drone);
-            
-            AutoPilotPatterns.addListener(new TaskListener(){
-                @Override
-                public void threadComplete(Runnable runner) {
-                    IndicatePatternStopped();
+        Drone.getVideoManager().addImageListener(TagAlignment);
+    }
+    
+    public synchronized void SetReferenceYaw(float yaw){ TagAlignment.SetReferenceYaw(yaw);}
+    public void SetReferenceYaw(){ TagAlignment.SetReferenceYaw();}
+    public float GetReferenceYaw(){return TagAlignment.GetReferenceYaw();}
+    
+    @Override
+    public void doWork()
+    {
+        if(CurrentPattern == null)
+            return;
+        
+        try
+        {
+            switch(CurrentPattern)
+            {
+                case TestThread:
+                {
+                    TestThread();
+                    break;
                 }
+                case HoverAndLand:
+                {
+                    HoverAndLand(5000);
+                    break;
+                }
+                case RLBF:
+                {
+                    RLBF();
+                    break;
+                }
+                case TagAlignment:
+                {
+                    TagAlignment();
+                    break;
+                }
+                case TagAlignmentLanding:
+                {
+                    SetTagAlignmentLanding(true);
+                    TagAlignment();
+                    break;
+                }
+                case SpinLeftHover:
+                {
+                    SpinLeftHover();
+                    break;
+                }
+                case SpinRightHover:
+                {
+                    SpinRightHover();
+                }
+                default:
+                {
+                    return;
+                }
+
+            }
+        }
+        catch(Exception e)
+        {
+            System.out.println("Pattern stopped: " + e);
+        }
+        
+    }
+    
+    private void SpinLeftHover() throws InterruptedException
+    {
+        Command.spinLeft(30);
+        Thread.sleep(1000);
+        
+        Command.spinRight(10);
+        Thread.sleep(500);
+        
+        Command.hover();
+    }
+    
+    private void SpinRightHover() throws InterruptedException
+    {
+        Command.spinRight(30);
+        Thread.sleep(1000);
+        
+        Command.spinLeft(10);
+        Thread.sleep(500);
+        
+        Command.hover();
+    }
+    
+    private void TagAlignment()
+    {
+        TagAlignment.ControlLoop();
+    }
+    
+    public void SetTagAlignmentLanding(boolean land)
+    {
+        TagAlignment.SetLanding(land);
+    }
+    
+    private void TestThread()
+    {
+        try
+        {
+            int i = 0;
+            while(true)
+            {
+                i++;
+                System.out.println("Iteration: " + i);
+                Thread.sleep(1000);
                 
-            });
-            
-            /* Listener for setting ReferenceYaw */
-            Drone.getNavDataManager().addAttitudeListener(new AttitudeListener() {
-
-                    @Override
-                    public synchronized void attitudeUpdated(float pitch, float roll, float yaw)
-                    {
-                        CurrentYaw = yaw;
-                    }
-
-                    public synchronized void attitudeUpdated(float pitch, float roll) { }
-                    public synchronized void windCompensation(float pitch, float roll) { }
-                });
-
+                if(test)
+                    System.out.println("TEST!!!!!!!!!!!!!!!!!!!");
+                
+                if(i > 20)
+                    break;
+            }
         }
-        
-        public void SetReferenceYaw()
+        catch(Exception e)
         {
-            AutoPilotPatterns.SetReferenceYaw();
+            System.out.println("TEST THREAD: " + e);
         }
-        
-        public void SetReferenceYaw(float yaw)
-        {
-            AutoPilotPatterns.SetReferenceYaw(yaw);
-        }
-        
-        public void StopAutoPilot()
-        {
+    }
+    
+    private void HoverAndLand(int ms)
+	{
+            try {
+                Command.takeOff();
+                Thread.sleep(5000);
+
+                Command.hover();
+                Thread.sleep(ms);
+
+                Command.landing();
+            }
+            catch (InterruptedException e) {
+                
+                System.out.println("HOVER AND LAND: " + e);
+                //e.printStackTrace();
+            }
+	}
+    
+    private void RLBF()
+	{
             try
             {
-                if(AutoPilotPatternsThread != null)
-                {
-                    AutoPilotPatternsThread.interrupt();
-                    //AutoPilotPatternsThread.stop();
-                }            
+                int speed = 30;
+
+                Command.takeOff();
+                Thread.sleep(5000);
+
+                Command.hover();
+                Thread.sleep(2000);
+
+                Command.goLeft(speed);
+                Thread.sleep(1000);
+
+                Command.hover();
+                Thread.sleep(2000);
+
+                Command.goRight(speed);
+                Thread.sleep(1000);
+
+                Command.hover();
+                Thread.sleep(2000);
+
+                Command.forward(speed);
+                Thread.sleep(1000);
+
+                Command.hover();
+                Thread.sleep(2000);
+
+                Command.backward(speed);
+                Thread.sleep(1000);
+
+                Command.hover();
+                Thread.sleep(2000);
+
+                Command.landing();
             }
             catch(Exception e)
             {
-                AutoPilotPatternsThread.stop();
+                System.out.println("Pattern stopped: " + e);
+            }
+
+            
+            /*
+            System.out.println();
+            System.out.println("******--- Pattern DONE ---******");
+            System.out.println("Distances from original position:");
+            System.out.println("MovedX: " + MovedX + " MovedY: " + MovedY + " MovedZ: " + MovedZ);
+            */
+	}
+        
+        private void FWBW(int speed, int duration)
+        {
+            try
+            {
+                Command.takeOff();
+                Thread.sleep(5000);
+
+                Command.hover();
+                Thread.sleep(2000);
+            
+                Command.forward(speed);
+                Thread.sleep(duration);
+                
+                Command.backward(speed);
+                Thread.sleep(duration);
+                
+                Command.hover();
+                Thread.sleep(2000);
+
+                Command.landing();
+            }
+            catch(Exception e)
+            {
+            
             }
             
-            Command.hover();
-            //Command.landing();
-            
-            IndicatePatternStopped();
         }
-	
-	private void IndicatePatternStarted()
-	{
-            autoPilotEngaged = true;
-            Command.setLedsAnimation(LEDAnimation.BLINK_ORANGE, 3, 5);
-	}
-	
-	private void IndicatePatternStopped()
-	{
-            System.out.println("*** PATTERN DONE ***");
-            
-            AutoPilotPatternsThread = null;
-            
-            autoPilotEngaged = false;
-            Command.setLedsAnimation(LEDAnimation.BLINK_GREEN, 3, 5);
-	}
-	
-	public void RunTagAlignment()
-	{
-            IndicatePatternStarted();
-            
-            BildanalysGUI gui = new BildanalysGUI(Drone);
-            Drone.getVideoManager().addImageListener(gui);
-            
-            AutoPilotPatterns.SetCurrentPattern(FlyingPattern.TagAlignment);
-            AutoPilotPatterns.SetTagAlignmentLanding(false);
-            
-            AutoPilotPatternsThread = new Thread(AutoPilotPatterns);
-            AutoPilotPatternsThread.start();
-	}
-	              
-	public void RunTagAlignmentLanding()
-	{
-            if(AutoPilotPatternsThread == null)
-                RunTagAlignment();
-                
-            AutoPilotPatterns.SetTagAlignmentLanding(true);
-	}
-        
-        public void RunTestThread()
-        {
-            IndicatePatternStarted();
-            
-            AutoPilotPatterns.SetCurrentPattern(FlyingPattern.TestThread);
-            
-            AutoPilotPatternsThread = new Thread(AutoPilotPatterns);
-            AutoPilotPatternsThread.start();
-        }
-        
-        public void SetTestInTestThread()
-        {
-            AutoPilotPatterns.test = true;
-        }
-	
-        public void RunHoverAndLand(int ms)
-        {
-            if(autoPilotEngaged)
-                StopAutoPilot();
-            
-            AutoPilotPatterns.SetCurrentPattern(FlyingPattern.HoverAndLand);
-            
-            AutoPilotPatternsThread = new Thread(AutoPilotPatterns);
-            AutoPilotPatternsThread.start();
-            
-            IndicatePatternStarted();
-        }
-	
-        public void RunRLBF()
-        {
-            if(autoPilotEngaged)
-                StopAutoPilot();
-            
-            AutoPilotPatterns.SetCurrentPattern(FlyingPattern.RLBF);
-            
-            AutoPilotPatternsThread = new Thread(AutoPilotPatterns);
-            AutoPilotPatternsThread.start();
-            
-            IndicatePatternStarted();
-            
-        }
-        
-	
+    
 }
+
+

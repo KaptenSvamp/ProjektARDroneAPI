@@ -1,9 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
+ * Enum for choosing flying patterns in AutoPilotPaterns
  *
  * @author Admin
  */
