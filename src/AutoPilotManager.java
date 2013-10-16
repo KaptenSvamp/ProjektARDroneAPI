@@ -1,10 +1,16 @@
 import NotificationThread.TaskListener;
 import TagAlignment.BildanalysGUI;
+import de.yadrone.apps.controlcenter.plugins.keyboard.KeyboardCommandManager;
 import de.yadrone.base.IARDrone;
 import de.yadrone.base.command.*;
 import de.yadrone.base.navdata.AttitudeListener;
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
+import java.awt.event.KeyEvent;
 
 /*
+ * Manages the AutoPilot class. Starts, stops and sets current AutoPilot.FlyingPattern.
+ * 
  * @author Rasmus Bjerstedt
  */
 public class AutoPilotManager {
@@ -17,6 +23,7 @@ public class AutoPilotManager {
 	//private TagAlignment TagAlignment;
         private AutoPilot AutoPilot;
         private Thread AutoPilotThread;
+        BildanalysGUI gui;
         
         private float CurrentYaw;
                
@@ -25,7 +32,9 @@ public class AutoPilotManager {
             Drone = drone;
             Command = Drone.getCommandManager();
             
-            Drone.getCommandManager().setVideoChannel(VideoChannel.VERT);
+            Command.setVideoChannel(VideoChannel.VERT);
+            //Command.setVideoBitrate(25);
+            //Command.setVideoCodec(VideoCodec.H264_720P_SLRS);
             
             AutoPilot = new AutoPilot(drone);
             
@@ -46,7 +55,9 @@ public class AutoPilotManager {
                         CurrentYaw = yaw;
                     }
 
+                    @Override
                     public synchronized void attitudeUpdated(float pitch, float roll) { }
+                    @Override
                     public synchronized void windCompensation(float pitch, float roll) { }
                 });
 
@@ -54,7 +65,7 @@ public class AutoPilotManager {
         
         public void SetReferenceYaw()
         {
-            AutoPilot.SetReferenceYaw();
+            AutoPilot.SetReferenceYaw(CurrentYaw);
         }
         
         public void SetReferenceYaw(float yaw)
@@ -93,6 +104,14 @@ public class AutoPilotManager {
 	{
             System.out.println("*** PATTERN DONE ***");
             
+            if(gui != null)
+            {
+                Drone.getVideoManager().removeImageListener(gui);
+                gui.getContentPane().removeAll();
+                gui.dispose();
+                gui = null;
+            }
+            
             AutoPilotThread = null;
             
             autoPilotEngaged = false;
@@ -103,11 +122,10 @@ public class AutoPilotManager {
 	{
             IndicatePatternStarted();
             
-            BildanalysGUI gui = new BildanalysGUI(Drone);
+            gui = new BildanalysGUI(Drone);
             Drone.getVideoManager().addImageListener(gui);
             
             AutoPilot.SetCurrentPattern(FlyingPattern.TagAlignment);
-            AutoPilot.SetTagAlignmentLanding(false);
             
             AutoPilotThread = new Thread(AutoPilot);
             AutoPilotThread.start();

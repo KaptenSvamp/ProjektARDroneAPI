@@ -8,7 +8,7 @@ import de.yadrone.base.command.*;
  * @author Rasmus Bjerstedt
  */
 public class CustomDroneControl {
-    private final IARDrone Drone;
+    public final IARDrone Drone;
     private final CommandManager Command;
 
     public NavigationData NavigationData;
@@ -25,7 +25,6 @@ public class CustomDroneControl {
     {
         Drone = new ARDrone();
         Command = Drone.getCommandManager();
-        Command.setOutdoor(false, true);
         SystemStartTime = 0;
 
         if(Start())
@@ -38,8 +37,6 @@ public class CustomDroneControl {
         }
 
         //Command.setVideoChannel(VideoChannel.HORI);
-        //Command.setVideoCodec(VideoCodec.H264_720P);
-        //Command.setVideoCodecFps(1);
     }
 
     public boolean Start()

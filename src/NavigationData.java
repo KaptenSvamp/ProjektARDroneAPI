@@ -6,6 +6,14 @@ import de.yadrone.base.navdata.*;
 import de.yadrone.base.video.*;
 import java.util.ArrayList;
 
+/**
+ * 
+ * Initiates and receives NavData from the YADrone API. 
+ * Some data can be reached by the validation tool by calling their Get-function.
+ * Uses NavdataLogger to log data into files.
+ * 
+ * @author Rasmus Bjerstedt
+ */
 public class NavigationData {
 	private final IARDrone Drone;
         private final NavDataManager Manager;
@@ -184,8 +192,10 @@ public class NavigationData {
                     @Override
                     public synchronized void batteryLevelChanged(int percentage)
                     {
+                        if(BatteryLevel > percentage)
+                            System.out.println("Battery: " + percentage + " %");
+                            
                         BatteryLevel = percentage;
-                        //System.out.println("Battery: " + percentage + " %");
                     }
 
                     @Override
@@ -223,8 +233,10 @@ public class NavigationData {
 
                         long temp = System.currentTimeMillis();
 
-                        double time = (temp - LastVelocityReadTime) / 1000;
+                        double time = ((double)temp - LastVelocityReadTime)/1000;
 
+                        //System.out.println("time: " + time + " current:" + temp + " lastRead: " + LastVelocityReadTime);
+                        
                         LastVelocityReadTime = temp;
 
                         MovedX += (vx)*time;
@@ -235,7 +247,7 @@ public class NavigationData {
 
                         distanceLogger.LogData(data2, timeSinceStart, timeStamp);
 
-                            //System.out.println("vx: " + (vx/1000)*time + " vy: " + (vy/1000)*time + " vz: " + (vz/1000)*time);
+                        //System.out.println("vx: " + (vx/1000)*time + " vy: " + (vy/1000)*time + " vz: " + (vz/1000)*time);
 
                     }
                 });
@@ -394,6 +406,37 @@ public class NavigationData {
                         
                         logger.LogData(data, timeSinceStart, timeStamp);
                         
+                    }
+                });
+                
+                Manager.addAdcListener(new AdcListener() {
+                    NavdataLogger logger;
+                    
+                    @Override
+                    public void receivedFrame(AdcFrame af) {
+                        
+                        byte[] adcFrame = af.getData_frame();
+                        
+                        if(logger == null)
+                        {
+                            String description = "";
+                            
+                            for(int i = 0; i < adcFrame.length; i++)
+                            {
+                                description += "adcFrameByte" + i + NavdataLogger.sep;
+                            }
+                            
+                            logger = new NavdataLogger("AdcFrame", description);
+                        }
+                        
+                        String[] data = new String[adcFrame.length];
+                        
+                        for(int i = 0; i < adcFrame.length; i++)
+                        {
+                            data[i] =  "" + adcFrame[i];
+                        }
+                        
+                        logger.LogData(data, GetTimeSinceStart(), CurrentTimeStamp);
                     }
                 });
 

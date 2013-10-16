@@ -1,17 +1,17 @@
 
+import de.yadrone.apps.controlcenter.plugins.keyboard.KeyboardCommandManager;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.*;
 
-import de.yadrone.base.*;
-import de.yadrone.base.navdata.*;
+import java.awt.event.KeyEvent;
 
 public class main
 {
 	public static CustomDroneControl droneControl = null;
-	
+	private static KeyboardCommandManager keyboardCommandManager;
 	public static void main (String agrs[])
 	{
             
@@ -38,6 +38,25 @@ public class main
                 });
                 
             }
+            
+            keyboardCommandManager = new KeyboardCommandManager(droneControl.Drone);
+		
+            KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+            manager.addKeyEventDispatcher( new KeyEventDispatcher() {
+    	
+                public boolean dispatchKeyEvent(KeyEvent e)
+		{
+                    if (e.getID() == KeyEvent.KEY_PRESSED) 
+                    {
+                        keyboardCommandManager.keyPressed(e);
+                    } 
+                    else if (e.getID() == KeyEvent.KEY_RELEASED) 
+                    {
+                        keyboardCommandManager.keyReleased(e);
+                    }
+                    return false;
+		}
+            });
 	}
 	
 	public static void CreateJFrame()
@@ -73,12 +92,14 @@ public class main
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     try
-                    {
+                    {              
                         droneControl.TakeOff();
                         
-                        Thread.sleep(5000);
+                        Thread.sleep(4000);
                         
                         droneControl.Hover();
+                        
+                        droneControl.AutoPilotManager.SetReferenceYaw();
                     }
                     catch(Exception ee)
                     {}
@@ -168,5 +189,6 @@ public class main
 		
 	}
 
+        
 }
 

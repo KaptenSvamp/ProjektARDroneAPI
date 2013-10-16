@@ -38,7 +38,7 @@ public class ImageAnalyser  {
     public BufferedImage analyse(BufferedImage bi)
     {
         this.currentImage = bi;
-        ColorEncapsulator IR_Finder = new ColorEncapsulator(COLORS.WHITE, currentImage.getWidth(), currentImage.getHeight());
+        ColorEncapsulator IR_Finder = new ColorEncapsulator(COLORS.RED, currentImage.getWidth(), currentImage.getHeight());
         irFinderPoint = null;
 
         for (int x=0;x<this.currentImage.getWidth();x+=5)
@@ -76,19 +76,24 @@ public class ImageAnalyser  {
      * Determines if the identified body is centerered or not.
      * @return 
      */    
-    public boolean isCentered()
+    /*public boolean isCentered()
     {
         int tolerance = TagAlignment.TagAlignment.TOLERANCE / 2;
-        int w = TagAlignment.TagAlignment.IMAGE_WIDTH;
-        int h = TagAlignment.TagAlignment.IMAGE_HEIGHT;
+        //int w = TagAlignment.TagAlignment.IMAGE_WIDTH;
+        //int h = TagAlignment.TagAlignment.IMAGE_HEIGHT;
+        int w = TagAlignment.TagAlignment.IMAGE_WIDTH / 2;
+        int h = TagAlignment.TagAlignment.IMAGE_HEIGHT / 2;
         boolean horizontal;
         boolean vertical;
         
-        horizontal  = (getOrigin().x > w-tolerance && getOrigin().x < w+tolerance);
-        vertical    = (getOrigin().y > h-tolerance && getOrigin().y < h+tolerance);
+        double x = getOrigin().getX();
+        double y = getOrigin().getY();
+        
+        horizontal  = (x > w-tolerance && x < w+tolerance);
+        vertical    = (y > h-tolerance && y < h+tolerance);
         
         return (horizontal && vertical);
-    }
+    }*/
     /**
      * Returns the origin of the identified body
      * @return Origin in coordinates relative to the analysed BufferedImage

@@ -1,7 +1,11 @@
 import java.io.*;
 import java.util.Date;
 
-
+/**
+ * Logs received data in .txt-files.
+ * 
+ * @author Rasmus Bjerstedt
+ */
 public class NavdataLogger {
 		public String Path;
 		public String FullPath;
@@ -13,14 +17,21 @@ public class NavdataLogger {
 		public static final String ln = "\r\n";
 		public static final String sep = "\t";
 		
-		public NavdataLogger(String name, String description)
+		               
+                public NavdataLogger(String name, String description)
 		{
-			Name = name;
-			Description = description;
-			Path = "C:\\temp\\data";
-			CurrentDateTime = new Date().toString().replace(":", "_");
-			FullPath = Path + "\\" + name + " " + CurrentDateTime + ".txt";
-			SampleCount = 0;
+                    this(name, description, "C:\\temp\\data", 
+                            name + " " + new Date().toString().replace(":", "_") + ".txt");
+		}
+                
+                public NavdataLogger(String name, String description, String path, String FileName)
+		{
+                    CurrentDateTime = new Date().toString().replace(":", "_");
+                    Name = name;
+                    Description = description;
+                    Path = path;
+                    FullPath = Path + "\\" + FileName;
+                    SampleCount = 0;
 		}
 				
 		public void LogData(String[] data, long systemStamp, long timeStamp)
@@ -36,14 +47,14 @@ public class NavdataLogger {
 
                         if(!exists)
                         {
-                                out.write("[" + Name + ", " + CurrentDateTime + "]" + ln);
-                                out.write("[Sample" + sep + "SystemStamp" + sep + "TimeStamp" + sep+ Description + "]" + ln);
+                            out.write("[" + Name + ", " + CurrentDateTime + "]" + ln);
+                            out.write("[Sample" + sep + "SystemStamp" + sep + "TimeStamp" + sep+ Description + "]" + ln);
                         }
 
                         String toPrint = SampleCount + sep + systemStamp + sep + timeStamp;
 
                         for(String d : data){
-                                toPrint += sep + d;
+                            toPrint += sep + d;
                         }
 
                         out.write(toPrint + ln);
@@ -56,15 +67,15 @@ public class NavdataLogger {
                     }
                     finally
                     {
-                            if(out != null)
+                        if(out != null)
+                        {
+                            try
                             {
-                                    try
-                                    {
-                                            out.close();
-                                    }
-                                    catch(Exception ex)
-                                    {}
+                                    out.close();
                             }
+                            catch(Exception ex)
+                            {}
+                        }
                     }
 		}
 		/*

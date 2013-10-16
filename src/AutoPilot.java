@@ -5,7 +5,8 @@ import de.yadrone.base.IARDrone;
 import de.yadrone.base.command.CommandManager;
 
 /**
- *
+ * Runs predefined patterns. Extends NotificationThread.
+ * 
  * @author Rasmus Bjerstedt
  */
 public class AutoPilot extends NotificationThread{
@@ -25,13 +26,18 @@ public class AutoPilot extends NotificationThread{
     {
         Drone = drone;
         Command = drone.getCommandManager();
-        TagAlignment = new TagAlignment(Drone);
-        
-        Drone.getVideoManager().addImageListener(TagAlignment);
     }
     
-    public synchronized void SetReferenceYaw(float yaw){ TagAlignment.SetReferenceYaw(yaw);}
-    public void SetReferenceYaw(){ TagAlignment.SetReferenceYaw();}
+    private float ReferenceYaw;
+    
+    public synchronized void SetReferenceYaw(float yaw)
+    { 
+        ReferenceYaw = yaw; 
+        
+        if(TagAlignment != null)
+            TagAlignment.SetReferenceYaw(yaw);
+    }
+    //public void SetReferenceYaw(){ TagAlignment.SetReferenceYaw();}
     public float GetReferenceYaw(){return TagAlignment.GetReferenceYaw();}
     
     @Override
@@ -61,11 +67,21 @@ public class AutoPilot extends NotificationThread{
                 }
                 case TagAlignment:
                 {
+                    TagAlignment = new TagAlignment(Drone);
+                    Drone.getVideoManager().addImageListener(TagAlignment);
+                    SetTagAlignmentLanding(false);
+                    
+                    TagAlignment.SetReferenceYaw(ReferenceYaw);
+                    
                     TagAlignment();
                     break;
                 }
                 case TagAlignmentLanding:
                 {
+                    TagAlignment = new TagAlignment(Drone);
+                    Drone.getVideoManager().addImageListener(TagAlignment);
+                    
+                    TagAlignment.SetReferenceYaw(ReferenceYaw);
                     SetTagAlignmentLanding(true);
                     TagAlignment();
                     break;
@@ -90,6 +106,9 @@ public class AutoPilot extends NotificationThread{
         {
             System.out.println("Pattern stopped: " + e);
         }
+        
+        Drone.getVideoManager().removeImageListener(TagAlignment);
+        TagAlignment = null;
         
     }
     

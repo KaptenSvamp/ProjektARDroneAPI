@@ -48,10 +48,12 @@ public class BildanalysGUI extends JFrame implements ImageListener, TagListener
         setSize(TagAlignment.IMAGE_WIDTH, TagAlignment.IMAGE_HEIGHT);
         setVisible(true);
         
+        
+        
         addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
-				drone.stop();
-				System.exit(0);
+				//drone.stop();
+				//System.exit(0);
 			}
 		});
         
@@ -110,6 +112,8 @@ public class BildanalysGUI extends JFrame implements ImageListener, TagListener
         setContentPane(contentPane);
 	}
 	
+        
+        
 	private long imageCount = 0;
 	
 	public void imageUpdated(BufferedImage newImage)
