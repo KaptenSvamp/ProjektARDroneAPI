@@ -1,3 +1,5 @@
+package NavigationData;
+
 
 import java.awt.image.BufferedImage;
 
@@ -189,6 +191,8 @@ public class NavigationData {
 
                 Manager.addBatteryListener(new BatteryListener() {
                     
+                    private NavdataLogger logger;
+                    
                     @Override
                     public synchronized void batteryLevelChanged(int percentage)
                     {
@@ -196,6 +200,15 @@ public class NavigationData {
                             System.out.println("Battery: " + percentage + " %");
                             
                         BatteryLevel = percentage;
+                        
+                        if(logger == null)
+                        {
+                            logger = new NavdataLogger("Battery", "battery");
+                        }
+
+                        String[] data = {percentage+""};
+
+                        logger.LogData(data, GetTimeSinceStart(), CurrentTimeStamp);
                     }
 
                     @Override
@@ -254,13 +267,61 @@ public class NavigationData {
 
                 Manager.addAcceleroListener(new AcceleroListener()
                 {
+                    private NavdataLogger logger;
+                    private NavdataLogger loggerRaw;
+                    
                     @Override
-                    public synchronized void receivedPhysData(AcceleroPhysData arg0) {
+                    public synchronized void receivedPhysData(AcceleroPhysData physData) {
+                        
+                        String desc = "";
+                        
+                        float[] physAccs = physData.getPhysAccs();
+                        float accsTemp = physData.getAccsTemp();
+                        int alim3v3 = physData.getAlim3v3();
+                        
+                        String[] logdata = new String[physAccs.length + 2];
+                        
+                        for(int i = 0; i < physAccs.length; i++)
+                        {
+                            desc += "physAccs" + i + NavdataLogger.sep;
+                            logdata[i] = physAccs[i] + "";
+                        }
+                        
+                        desc += "acsTemp" + NavdataLogger.sep;
+                        logdata[physAccs.length] = accsTemp + "";
+                        
+                        desc += "alim3v3" + NavdataLogger.sep;
+                        logdata[physAccs.length +1] = alim3v3 + "";
+                        
+                        if(logger == null)
+                        {
+                            logger = new NavdataLogger("AcceleroPhysData", desc);
+                        }
+
+                        logger.LogData(logdata, GetTimeSinceStart(), CurrentTimeStamp);
+                        
                     }
 
                     @Override
-                    public synchronized void receivedRawData(AcceleroRawData arg0) {
-                            // TODO Auto-generated method stub
+                    public synchronized void receivedRawData(AcceleroRawData raw) {
+                         String desc = "";
+                        
+                        int[] rawAccs = raw.getRawAccs();
+                        
+                        String[] logdata = new String[rawAccs.length];
+                        
+                        for(int i = 0; i < rawAccs.length; i++)
+                        {
+                            desc += "rawAccs" + i + NavdataLogger.sep;
+                            logdata[i] = rawAccs[i] + "";
+                        }
+                        
+                        if(loggerRaw == null)
+                        {
+                            loggerRaw = new NavdataLogger("AcceleroRawData", desc);
+                        }
+
+                        loggerRaw.LogData(logdata, GetTimeSinceStart(), CurrentTimeStamp);
 
                     }
 

@@ -1,3 +1,5 @@
+package AutoPilot;
+
 import NotificationThread.TaskListener;
 import TagAlignment.BildanalysGUI;
 import de.yadrone.apps.controlcenter.plugins.keyboard.KeyboardCommandManager;
@@ -32,9 +34,10 @@ public class AutoPilotManager {
             Drone = drone;
             Command = Drone.getCommandManager();
             
-            Command.setVideoChannel(VideoChannel.VERT);
+            Command.setVideoChannel(VideoChannel.HORI);
+            //Command.setVideoCodec(VideoCodec.H264_720P);
             //Command.setVideoBitrate(25);
-            //Command.setVideoCodec(VideoCodec.H264_720P_SLRS);
+            
             
             AutoPilot = new AutoPilot(drone);
             
@@ -47,6 +50,7 @@ public class AutoPilotManager {
             });
             
             /* Listener for setting ReferenceYaw */
+            
             Drone.getNavDataManager().addAttitudeListener(new AttitudeListener() {
 
                     @Override

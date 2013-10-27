@@ -1,3 +1,5 @@
+package AutoPilot;
+
 
 import NotificationThread.NotificationThread;
 import TagAlignment.TagAlignment;
@@ -68,10 +70,11 @@ public class AutoPilot extends NotificationThread{
                 case TagAlignment:
                 {
                     TagAlignment = new TagAlignment(Drone);
-                    Drone.getVideoManager().addImageListener(TagAlignment);
+                    TagAlignment.SetReferenceYaw(ReferenceYaw);
                     SetTagAlignmentLanding(false);
                     
-                    TagAlignment.SetReferenceYaw(ReferenceYaw);
+                    Drone.getVideoManager().addImageListener(TagAlignment);
+                    
                     
                     TagAlignment();
                     break;
@@ -141,7 +144,8 @@ public class AutoPilot extends NotificationThread{
     
     public void SetTagAlignmentLanding(boolean land)
     {
-        TagAlignment.SetLanding(land);
+        if(TagAlignment != null) 
+            TagAlignment.SetLanding(land);
     }
     
     private void TestThread()

@@ -1,3 +1,5 @@
+package AutoPilot;
+
 /**
  * Enum for choosing flying patterns in AutoPilotPaterns
  *

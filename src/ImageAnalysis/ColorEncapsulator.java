@@ -15,7 +15,7 @@ public class ColorEncapsulator {
     int xmin,xmax,ymin,ymax;
     private COLORS color;
     private boolean foundColor;
-    private final int dominans = 90;
+    private final int dominans = 120;//120;//90
     /**
      * Creates a ColorEncapsulator class
      * @param c Specified color to look for
@@ -66,7 +66,7 @@ public class ColorEncapsulator {
         {
             case RED:
 //                if (red > 2* blue && red > 2*green)
-                if (red > dominans && blue < 60 && green < 60)
+                if (red > dominans && blue < 75 && green < 75)
                     return true;
                 return false;
             case GREEN:

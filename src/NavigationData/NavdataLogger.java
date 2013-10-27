@@ -1,3 +1,5 @@
+package NavigationData;
+
 import java.io.*;
 import java.util.Date;
 
@@ -21,7 +23,8 @@ public class NavdataLogger {
                 public NavdataLogger(String name, String description)
 		{
                     this(name, description, "C:\\temp\\data", 
-                            name + " " + new Date().toString().replace(":", "_") + ".txt");
+                             "landning 13 - " + name+ ".txt");
+                            //name + " " + new Date().toString().replace(":", "_") + ".txt");
 		}
                 
                 public NavdataLogger(String name, String description, String path, String FileName)

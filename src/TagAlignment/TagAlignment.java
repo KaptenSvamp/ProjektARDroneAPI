@@ -7,9 +7,11 @@ import de.yadrone.base.IARDrone;
 import de.yadrone.base.command.LEDAnimation;
 import de.yadrone.base.navdata.AltitudeListener;
 import de.yadrone.base.navdata.AttitudeListener;
+import de.yadrone.base.navdata.VelocityListener;
 import de.yadrone.base.video.ImageListener;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -29,8 +31,10 @@ public class TagAlignment implements ImageListener
     
     /* Static settings for precision, speed and so on. */
     public final static int TOLERANCE = 80;
+    public final static int YCOMP = 60;
     private final static int SPEED = 1;
-    private final static int SLEEP = 500;
+    private final static int MULTIPEL = 2;
+    private final static int SLEEP = 100;
     private final static int LandingAltitude = 200;	//mm
     
     private boolean DoLanding;
@@ -45,7 +49,14 @@ public class TagAlignment implements ImageListener
     private float ReferenceYaw;
     public synchronized void SetReferenceYaw(float yaw){ReferenceYaw = yaw; System.out.println("RefSet to " + yaw);}
     public void SetReferenceYaw(){ ReferenceYaw = CurrentYaw; System.out.println("RefSet to current");}
-    public float GetReferenceYaw(){return ReferenceYaw;}
+    public synchronized float GetReferenceYaw(){return ReferenceYaw;}
+    
+    private float CurrentRoll;
+    private float CurrentPitch;
+    
+    private float VelocityX;
+    private float VelocityY;
+    private float VelocityZ;
     
     /* List for all analysed image data */
     private ConcurrentLinkedDeque<AnalysedImageObject> Images; 
@@ -57,7 +68,16 @@ public class TagAlignment implements ImageListener
     public TagAlignment(IARDrone drone)
     {
         Drone = drone;
+        
         Images = new ConcurrentLinkedDeque<AnalysedImageObject>();
+        LastKnownCommandMove = new int[]{0,0,0,0};
+        
+        CurrentPitch = 0;
+        CurrentRoll = 0;
+        CurrentYaw = 0;
+        VelocityX = 0;
+        VelocityY = 0;
+        VelocityZ = 0;
         
         altitudeListener = new AltitudeListener()
         {
@@ -81,6 +101,8 @@ public class TagAlignment implements ImageListener
                 @Override
                 public synchronized void attitudeUpdated(float pitch, float roll, float yaw)
                 {
+                    CurrentPitch = pitch;
+                    CurrentRoll = roll;
                     CurrentYaw = yaw;
                 }
 
@@ -91,6 +113,16 @@ public class TagAlignment implements ImageListener
         };
         
         drone.getNavDataManager().addAttitudeListener(attitudeListener);
+        
+        drone.getNavDataManager().addVelocityListener(new VelocityListener() {
+
+            @Override
+            public void velocityChanged(float x, float y, float z) {
+                VelocityX = x;
+                VelocityY = y;
+                VelocityZ = z;
+            }
+        });
     }
 
     @Override
@@ -112,57 +144,60 @@ public class TagAlignment implements ImageListener
         {
             while(!Thread.interrupted())
             {
-                AnalysedImageObject imageObject = Images.peek(); // alt. Images.pollFirst();
+                AnalysedImageObject imageObject = Images.peekFirst();//Images.pollFirst();;
+                
+                //centerTagTesting();
                 
                 if(imageObject == null)
-                    continue;
-                
-                long time = 0;
-                
-                boolean recentImage = imageObject != null && 
-                        (time = (System.currentTimeMillis() - imageObject.TimeStamp)) <= 500;
-                
-                //if(imageObject == null)
-                   // System.out.println("Image is NULL");
-                //else if(!recentImage)
-                //    System.out.println("time out: " + time);
-                
-                
-                if(recentImage && imageObject.FoundColors)
                 {
-                    boolean isCentered = false;
-                   
-                    isCentered = IsCentered(imageObject) && IsOriented();
-                                        
-                    if (!isCentered) // tag visible, but not centered
-                    {
-                        //centerTag(imageObject);
-                        CenterTagMove(imageObject);
-                    }                    
-                    /*else if(DoLanding)
-                    {
-                        landing();
-                    }*/
-                    else{
-                        Drone.getCommandManager().hover();
-                        Thread.currentThread().sleep(SLEEP);
-                        
-                        if(DoLanding)
-                        {
-                            landing();
-                        }
-                    }
+                    System.out.println("Image is NULL");
                 }
                 else
                 {
-                    //FindTag();
-                    FindTagMove();
+                    long time = 0;
+                    boolean recentImage = (time = (System.currentTimeMillis() - imageObject.TimeStamp)) <= 75;
+
+                    if(!recentImage)
+                        System.out.println("time out: " + time);
+
+                    if(recentImage && imageObject.FoundColors)
+                    {
+                        boolean isCentered = false;
+
+                        isCentered = IsCentered(imageObject) && IsOriented();
+
+                        if (!isCentered)
+                        {
+                            CenterTagMove(imageObject);
+                        }                    
+                        else if(DoLanding)
+                        {
+                            System.out.println("Centered: HOVER");
+                            Drone.getCommandManager().hover();
+                            Thread.currentThread().sleep(150);
+                            
+                            landing();
+                        }
+                        else
+                        {
+                            System.out.println("Centered: HOVER");
+                            Drone.getCommandManager().hover();
+                            Thread.currentThread().sleep(SLEEP);
+                        }
+                    }
+                    else
+                    {
+                        FindTagMove();
+                    }
+                    
                 }
             }
         }
         catch(Exception e)
         {
-            System.out.println("TagAlignmentLoop exception: " + e);
+            String message = Arrays.toString(e.getStackTrace());
+            
+            System.out.println("TagAlignmentLoop exception: " + message);
         }
         
         Drone.getNavDataManager().removeAltitudeListener(altitudeListener);
@@ -185,7 +220,7 @@ public class TagAlignment implements ImageListener
     private boolean IsCentered(AnalysedImageObject imageObject)
     {
         int imgCenterX = TagAlignment.IMAGE_WIDTH / 2;
-        int imgCenterY = TagAlignment.IMAGE_HEIGHT / 2;
+        int imgCenterY = TagAlignment.IMAGE_HEIGHT / 2 + YCOMP;
 
         double x = imageObject.X;
         double y = imageObject.Y;
@@ -220,53 +255,63 @@ public class TagAlignment implements ImageListener
      */
     private void CenterTagMove(AnalysedImageObject imageObject) throws InterruptedException
     {
-        int speedX = 0;
         int speedY = 0;
+        int speedX = 0;
         int speedZ = 0;
         int speedSpin = 0;
         
-        Point points;
         float orientation = (ReferenceYaw - CurrentYaw)/1000;
 
         System.out.println("orientation: " + orientation + " ref: " + ReferenceYaw/1000 + " curr: " + CurrentYaw/1000);
 
-        /*synchronized(ImageAnalyser)
-        {
-            points = ImageAnalyser.getOrigin();
-        }*/
-
         int imgCenterX = TagAlignment.IMAGE_WIDTH / 2;
-        int imgCenterY = TagAlignment.IMAGE_HEIGHT / 2;
+        int imgCenterY = TagAlignment.IMAGE_HEIGHT / 2 + YCOMP;
 
-        double x = imageObject.X;//points.getX();
-        double y = imageObject.Y;//points.getY();
+        double x = imageObject.X;
+        double y = imageObject.Y;
         
         // Go left/right
         if (x < (imgCenterX - TagAlignment.TOLERANCE))
         {
+            int multi = 1;
+            if(VelocityY > 0)
+                multi = MULTIPEL;
+            
             System.out.println("TagAlignment: Go left");
-            Drone.getCommandManager().goLeft(SPEED);
-            speedX = -(SPEED);
+            Drone.getCommandManager().goLeft(SPEED * multi);
+            speedY = -(SPEED* multi);
         }
         else if (x > (imgCenterX + TagAlignment.TOLERANCE))
         {
-            System.out.println("TagAlignment: Go right");
-            Drone.getCommandManager().goRight(SPEED);
-            speedX = (SPEED);
+            int multi = 1;
+            if(VelocityY < 0)
+                multi = MULTIPEL;
+            
+            System.out.println("TagAlignment: Go right" + (multi > 1 ? "MULTI 2" : ""));
+            //Drone.getCommandManager().goRight(SPEED * multi);
+            speedY = (SPEED* multi);
         }
         
         // Go forward/backward
         if (y < (imgCenterY - TagAlignment.TOLERANCE))
         {
+            int multi = 1;
+            if(VelocityX < 0)
+                multi = MULTIPEL;
+            
             System.out.println("TagAlignment: Go forward");
-            Drone.getCommandManager().forward(SPEED);
-            speedY = (SPEED);
+            //Drone.getCommandManager().forward(SPEED * multi);
+            speedX = (SPEED* multi);
         }
         else if (y > (imgCenterY + TagAlignment.TOLERANCE))
         {
+            int multi = 1;
+            if(VelocityX > 0)
+                multi = MULTIPEL;
+            
             System.out.println("TagAlignment: Go backward");
-            Drone.getCommandManager().backward(SPEED);
-            speedY = -(SPEED);
+            //Drone.getCommandManager().backward(SPEED * multi);
+            speedX = -(SPEED* multi);
         }
         
         // Spin left/right
@@ -274,20 +319,20 @@ public class TagAlignment implements ImageListener
         {
             System.out.println("TagAlignment: Spin left");
             speedSpin = -(SPEED*2);
-            Drone.getCommandManager().spinLeft(SPEED*2);
+            //Drone.getCommandManager().spinLeft(SPEED*2);
         }
         else if ((orientation > 10) && (orientation > 180) || (orientation < -10) && (orientation > -180))
         {
             System.out.println("TagAlignment: Spin right");
             speedSpin = (SPEED*2);
-            Drone.getCommandManager().spinRight(SPEED*2);
+            //Drone.getCommandManager().spinRight(SPEED*2);
         }
         
-        if(speedX != 0 || speedY != 0 || speedZ != 0 || speedSpin != 0)
+        if(speedY != 0 || speedX != 0 || speedZ != 0 || speedSpin != 0)
         {
             LastKnownCommandMove = new int[]{speedX, speedY, speedZ, speedSpin};
             
-            //Drone.getCommandManager().move(speedX, speedY, speedZ, speedSpin);
+            Drone.move3D(speedX, -speedY, 0, speedSpin);
             Thread.sleep(SLEEP);
         }
         else
@@ -425,42 +470,86 @@ public class TagAlignment implements ImageListener
     {
         if(LastKnownCommandMove.length > 0)
         {
-            String right = LastKnownCommandMove[0] > 0 ? "go right " : "";
-            String left = LastKnownCommandMove[0] < 0 ? "go left " : "";
-            String forward = LastKnownCommandMove[1] > 0 ? "go forward " : "";
-            String backward = LastKnownCommandMove[1] < 0 ? "go backward " : "";
-            String spinRight = LastKnownCommandMove[3] > 0 ? "go spinRight " : "";
-            String spinLeft = LastKnownCommandMove[3] < 0 ? "go spinLeft " : "";
+            String info = "";
             
-            String all = right+left+forward+backward+spinRight+spinLeft;
-            
-            if(all.length() > 0)
-            {
-                all = "Find tag: " + all;
-                System.out.println(all);
-            }
+            int speedX = 0;
+            int speedY = 0;
+            int speedZ = 0; 
+            int speedSpin = 0;
             
             if(LastKnownCommandMove[0] > 0)
             {
+                int multi = 1;
+                if(VelocityX < 0)
+                    multi = MULTIPEL;
+                
+                speedX = SPEED * multi;
+                info += "go forward ";
+            }
+            else if(LastKnownCommandMove[0] < 0)
+            {
+                int multi = 1;
+                if(VelocityX > 0)
+                    multi = MULTIPEL;
+                
+                speedX = -SPEED * multi;
+                
+                info += "go backward ";
+            }
+            
+            if(LastKnownCommandMove[1] > 0)
+            {
+                int multi = 1;
+                if(VelocityY < 0)
+                    multi = MULTIPEL;
+                
+                speedY = SPEED * multi;
+                
+                info += "go right " + (multi > 1 ? "MULTI 2" : "");
+            }
+            else if(LastKnownCommandMove[1] < 0)
+            {
+                int multi = 1;
+                if(VelocityY > 0)
+                    multi = MULTIPEL;
+                
+                speedY = -SPEED * multi;
+                
+                info += "go left ";
+            }
+            
+            if(LastKnownCommandMove[3] > 0)
+            {
+                info += "go spinRight ";
+            }
+            else if(LastKnownCommandMove[3] < 0)
+            {
+                info += "go spinLeft ";
+            }
+            
+            if(info.length() > 0)
+            {
+                info = "Find tag: " + info;
+                System.out.println(info);
+            }
+            /*
+            if(LastKnownCommandMove[0] > 0)
+            {
                 Drone.getCommandManager().goRight(SPEED*2);
-                Thread.sleep(50);
             }
             else if(LastKnownCommandMove[0] < 0)
             {
                 Drone.getCommandManager().goLeft(SPEED*2);
-                Thread.sleep(50);
             }
             
             if(LastKnownCommandMove[1] > 0)
             {
                 Drone.getCommandManager().forward(SPEED*2);
-                Thread.sleep(50);
             }
             else if(LastKnownCommandMove[1] < 0)
             {
-                Thread.sleep(50);
                 Drone.getCommandManager().backward(SPEED*2);
-            }
+            }*/
             
             /*if(LastKnownCommandMove[3] > 0)
                 Drone.getCommandManager().spinRight(SPEED);
@@ -469,8 +558,7 @@ public class TagAlignment implements ImageListener
             */
             
             
-            //Drone.getCommandManager().move(LastKnownCommandMove[0], LastKnownCommandMove[1], 
-             //       LastKnownCommandMove[2], LastKnownCommandMove[3]);
+            Drone.move3D(speedX, -speedY, 0, 0);
             
             Thread.sleep(SLEEP);
         }

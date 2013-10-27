@@ -1,3 +1,8 @@
+package Main;
+
+import NavigationData.NavigationData;
+import AutoPilot.AutoPilotManager;
+import TagAlignment.TagAlignmentVelocity;
 import de.yadrone.base.*;
 import de.yadrone.base.command.*;
 
@@ -34,6 +39,7 @@ public class CustomDroneControl {
             AutoPilotManager = new AutoPilotManager(Drone);
 
             FlatTrim();
+            
         }
 
         //Command.setVideoChannel(VideoChannel.HORI);

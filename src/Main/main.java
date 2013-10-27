@@ -1,3 +1,5 @@
+package Main;
+
 
 import de.yadrone.apps.controlcenter.plugins.keyboard.KeyboardCommandManager;
 import java.awt.*;
@@ -95,7 +97,7 @@ public class main
                     {              
                         droneControl.TakeOff();
                         
-                        Thread.sleep(4000);
+                        Thread.sleep(5000);
                         
                         droneControl.Hover();
                         
@@ -113,6 +115,7 @@ public class main
 	    {
                 @Override
                 public void actionPerformed(ActionEvent e) {
+                        droneControl.AutoPilotManager.StopAutoPilot();
                         droneControl.Land();
                 }
 	    });
